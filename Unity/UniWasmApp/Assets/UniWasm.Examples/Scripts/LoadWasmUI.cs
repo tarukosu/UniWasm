@@ -2,25 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UniWasm;
 
-public class LoadWasmUI : MonoBehaviour
+namespace UniWasm.Examples
 {
-    [SerializeField]
-    WasmFromUrl wasmFromUrl;
-
-    [SerializeField]
-    private Button button;
-
-    [SerializeField]
-    private InputField inputField;
-
-    void Awake()
+    public class LoadWasmUI : MonoBehaviour
     {
-        button.onClick.AddListener(() =>
+        [SerializeField]
+        WasmFromUrl wasmFromUrl = null;
+
+        [SerializeField]
+        private Button button = null;
+
+        [SerializeField]
+        private InputField inputField = null;
+
+        void Awake()
         {
-            var url = inputField.text;
-            _ = wasmFromUrl.LoadWasmFromUrl(url);
-        });
+            button.onClick.AddListener(() =>
+            {
+                var url = inputField.text;
+                _ = wasmFromUrl.LoadWasmFromUrl(url);
+            });
+        }
     }
 }

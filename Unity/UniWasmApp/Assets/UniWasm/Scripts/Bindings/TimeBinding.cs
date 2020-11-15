@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Wasm;
 using Wasm.Interpret;
 
 namespace UniWasm
@@ -19,7 +18,7 @@ namespace UniWasm
         {
             var importer = new PredefinedImporter();
 
-            importer.DefineFunction("get_time",
+            importer.DefineFunction("time_get_time",
                  new DelegateFunctionDefinition(
                      ValueType.Unit,
                      ValueType.Float,

@@ -7,7 +7,7 @@ namespace UniWasm
     public class WasmFromUrl : WasmBehaviour
     {
         [SerializeField]
-        private string url;
+        private string url = null;
 
         private void Awake()
         {

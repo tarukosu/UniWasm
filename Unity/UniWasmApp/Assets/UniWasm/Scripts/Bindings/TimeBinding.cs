@@ -25,6 +25,12 @@ namespace UniWasm
                      GetTime
                      ));
 
+            importer.DefineFunction("time_get_delta_time",
+                 new DelegateFunctionDefinition(
+                     ValueType.Unit,
+                     ValueType.Float,
+                     GetDeltaTime
+                     ));
             Importer = importer;
         }
 
@@ -33,6 +39,13 @@ namespace UniWasm
             return new object[]
             {
                 Time.time
+            };
+        }
+        private IReadOnlyList<object> GetDeltaTime(IReadOnlyList<object> args)
+        {
+            return new object[]
+            {
+                Time.deltaTime
             };
         }
     }

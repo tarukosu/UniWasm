@@ -1,0 +1,2 @@
+# Build
+cargo wasi build

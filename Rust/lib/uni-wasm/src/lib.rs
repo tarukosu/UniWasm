@@ -78,10 +78,36 @@ pub mod transform {
         }
     }
 
+    pub fn set_local_scale(scale: Vector3)
+    {
+        unsafe
+        {
+            transform_set_local_scale(scale);
+        }
+    }
+
+    pub fn get_local_scale() -> Vector3
+    {
+        unsafe
+        {
+            let x = transform_get_local_scale_x();
+            let y = transform_get_local_scale_y();
+            let z = transform_get_local_scale_z();
+            Vector3 {
+                x, y, z
+            }
+        }
+    }
+
     extern "C" {
         fn transform_set_local_position(position: Vector3);
         fn transform_get_local_position() -> Vector3;
         fn transform_set_local_rotation(rotation: Quaternion);
         fn transform_get_local_rotation() -> Quaternion;
+        fn transform_set_local_scale(scale: Vector3);
+        fn transform_get_local_scale() -> Vector3;
+        fn transform_get_local_scale_x() -> f32;
+        fn transform_get_local_scale_y() -> f32;
+        fn transform_get_local_scale_z() -> f32;
     }
 }

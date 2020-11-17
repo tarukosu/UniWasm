@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Wasm;
 using Wasm.Interpret;
 
@@ -11,10 +12,17 @@ namespace UniWasm
     {
         private ModuleInstance module;
         private FunctionDefinition updateFunction;
+        private FunctionDefinition onTouchStartFunction;
 
         protected virtual void Update()
         {
             updateFunction?.Invoke(new object[0]);
+        }
+
+        public void InvokeOnTouchStart()
+        {
+            Debug.Log("invoke on touch start");
+            onTouchStartFunction?.Invoke(new object[0]);
         }
 
         public void LoadWasm(string path)
@@ -63,6 +71,16 @@ namespace UniWasm
 
             var exportedFunctions = module.ExportedFunctions;
             exportedFunctions.TryGetValue("update", out updateFunction);
+            exportedFunctions.TryGetValue("on_touch_start", out onTouchStartFunction);
+
+            // event trigger
+            var eventTrigger = gameObject.AddComponent<EventTrigger>();
+            var entry = new EventTrigger.Entry()
+            {
+                eventID = EventTriggerType.PointerDown,
+            };
+            entry.callback.AddListener(_ => InvokeOnTouchStart());
+            eventTrigger.triggers.Add(entry);
         }
     }
 }

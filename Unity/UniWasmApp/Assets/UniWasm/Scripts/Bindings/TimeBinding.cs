@@ -5,16 +5,9 @@ using Wasm.Interpret;
 
 namespace UniWasm
 {
-    public class TimeBinding
+    public class TimeBinding : BindingBase
     {
-        public PredefinedImporter Importer { private set; get; }
-
-        public TimeBinding()
-        {
-            InitImporter();
-        }
-
-        public void InitImporter()
+        public override PredefinedImporter GenerateImporter()
         {
             var importer = new PredefinedImporter();
 
@@ -31,7 +24,7 @@ namespace UniWasm
                      ValueType.Float,
                      GetDeltaTime
                      ));
-            Importer = importer;
+            return importer;
         }
 
         private IReadOnlyList<object> GetTime(IReadOnlyList<object> args)
@@ -48,5 +41,6 @@ namespace UniWasm
                 Time.deltaTime
             };
         }
+
     }
 }

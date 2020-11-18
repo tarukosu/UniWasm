@@ -1,7 +1,7 @@
-
 var numSocket = new Rete.Socket('Number value');
 
 var vector3Socket = new Rete.Socket('Vector3');
+// var vector3Socket = new Rete.Socket('Number');
 
 var VueNumControl = {
   props: ['readonly', 'emitter', 'ikey', 'getData', 'putData'],
@@ -14,6 +14,30 @@ var VueNumControl = {
   methods: {
     change (e) {
       this.value = +e.target.value;
+      this.update();
+    },
+    update () {
+      if (this.ikey)
+        this.putData(this.ikey, this.value)
+      this.emitter.trigger('process');
+    }
+  },
+  mounted () {
+    this.value = this.getData(this.ikey);
+  }
+}
+
+var VueTextControl = {
+  props: ['readonly', 'emitter', 'ikey', 'getData', 'putData'],
+  template: '<input type="text" :readonly="readonly" :value="value" @input="change($event)" @dblclick.stop="" @pointerdown.stop="" @pointermove.stop=""/>',
+  data () {
+    return {
+      value: "",
+    }
+  },
+  methods: {
+    change (e) {
+      this.value = e.target.value;
       this.update();
     },
     update () {
@@ -40,6 +64,18 @@ class NumControl extends Rete.Control {
   }
 }
 
+export class TextControl extends Rete.Control {
+  constructor(emitter, key, readonly) {
+    super(key);
+    this.component = VueTextControl;
+    this.props = { emitter, ikey: key, readonly };
+  }
+
+  setValue(val) {
+    this.vueContext.value = val;
+  }
+}
+
 class NumComponent extends Rete.Component {
 
   constructor() {
@@ -54,6 +90,12 @@ class NumComponent extends Rete.Component {
 
   worker (node, inputs, outputs) {
     outputs['num'] = node.data.num;
+  }
+
+  code (node, inputs, add) {
+    // add('console.log("number")')
+    add('num', node.data.num);
+    //add('num', node.data.num); // add variable with value "node.data.num"
   }
 }
 
@@ -85,6 +127,14 @@ class AddComponent extends Rete.Component {
     this.editor.nodes.find(n => n.id == node.id).controls.get('preview').setValue(sum);
     outputs['numout'] = sum;
   }
+
+  code (node, inputs, add) {
+    // add('console.log("add")')
+    // add('num', inputs['num'][0]);
+    //add('num', inputs['num'][0] + inputs['num1'][0]);
+    add('numout', `${inputs['num'][0]}+${inputs['num2'][0]}`);
+    //add('num', node.data.num); // add variable with value "node.data.num"
+  }
 }
 
 class GetPositionComponent extends Rete.Component {
@@ -111,17 +161,27 @@ class Vector3Component extends Rete.Component {
     var inp_x = new Rete.Input('x', "x", numSocket);
     var inp_y = new Rete.Input('y', "y", numSocket);
     var inp_z = new Rete.Input('z', "z", numSocket);
+
     var out = new Rete.Output('output', "Vector3", vector3Socket);
     return node
       .addInput(inp_x)
       .addInput(inp_y)
       .addInput(inp_z)
+      .addControl(new TextControl(this.editor, 'preview', true))
       .addOutput(out);
   }
 
   worker (node, inputs, outputs) {
-    console.log(inputs['x'][0]);
-    outputs['output'] = [inputs['x'][0], inputs['y'][0], inputs['z'][0]];
+    //console.log(inputs['x'][0]);
+    var vec = [inputs['x'][0], inputs['y'][0], inputs['z'][0]]
+    this.editor.nodes.find(n => n.id == node.id).controls.get('preview').setValue(vec);
+    outputs['output'] = vec;
+  }
+
+  code (node, inputs, add) {
+    // add('console.log("vec")')
+    // console.log(node);
+    add('output', `[${inputs['x'][0]}, ${inputs['y'][0]}, ${inputs['z'][0]}]`);
   }
 }
 
@@ -137,15 +197,27 @@ class DeconstructVector3Component extends Rete.Component {
     var out_z = new Rete.Output('z', "z", numSocket);
     return node
       .addInput(inp1)
+      .addControl(new TextControl(this.editor, 'preview', true))
       .addOutput(out_x)
       .addOutput(out_y)
       .addOutput(out_z);
   }
 
   worker (node, inputs, outputs) {
-    outputs['x'] = inputs['input'][0][0];
-    outputs['y'] = inputs['input'][0][1];
-    outputs['z'] = inputs['input'][0][2];
+    const vec = inputs['input'][0];
+    this.editor.nodes.find(n => n.id == node.id).controls.get('preview').setValue(vec[0]);
+
+    outputs['x'] = vec[0];
+    outputs['y'] = vec[1];
+    outputs['z'] = vec[2];
+
+    node.data = vec;
+  }
+
+  code (node, inputs, add) {
+   add('x', `${inputs['input'][0]}[0]`);
+   add('y', `${inputs['input'][0]}[1]`);
+   add('z', `${inputs['input'][0]}[2]`);
   }
 }
 
@@ -174,12 +246,12 @@ class DeconstructVector3Component extends Rete.Component {
   var n2 = await components[0].createNode({ num: -1 });
   var n3 = await components[0].createNode({ num: 3 });
   var n4 = await components[0].createNode({ num: 10 });
-  var add = await components[1].createNode();
+  
 
-  var vec = await components[4].createNode({ x: 0, y: 1, z: 2 });
+  var vec = await components[4].createNode();
   var dec = await components[3].createNode();
-
-  var new_vec = await components[4].createNode({ x: 0, y: 1, z: 2 });
+  var add = await components[1].createNode();
+  var new_vec = await components[4].createNode();
 
   n1.position = [0, 0];
   n2.position = [0, 200];
@@ -196,10 +268,10 @@ class DeconstructVector3Component extends Rete.Component {
   editor.addNode(n2);
   editor.addNode(n3);
   editor.addNode(n4);
-  editor.addNode(add);
+  
   editor.addNode(vec);
   editor.addNode(dec);
-
+  editor.addNode(add);
   editor.addNode(new_vec);
   /*
   editor.connect(n1.outputs.get('num'), add.inputs.get('num'));
@@ -230,5 +302,17 @@ class DeconstructVector3Component extends Rete.Component {
   editor.view.resize();
   AreaPlugin.zoomAt(editor);
   editor.trigger('process');
+
+
+  window.setTimeout(async () => {
+    
+    const json = editor.toJSON()
+    console.log(json);
+    
+    console.log(JSON.stringify(json, null, 2));
+    const sourceCode = await CodePlugin.generate(engine, editor.toJSON());
+    console.log(sourceCode);
+  }, "1000");
+
 
 })();

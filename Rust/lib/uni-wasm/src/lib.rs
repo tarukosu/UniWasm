@@ -56,9 +56,20 @@ pub mod transform {
 
     pub fn get_local_position() -> Vector3
     {
+        /*
         unsafe
         {
             return transform_get_local_position();
+        }
+        */
+        unsafe
+        {
+            let x = transform_get_local_position_x();
+            let y = transform_get_local_position_y();
+            let z = transform_get_local_position_z();
+            Vector3 {
+                x, y, z
+            }
         }
     }
 
@@ -102,6 +113,9 @@ pub mod transform {
     extern "C" {
         fn transform_set_local_position(position: Vector3);
         fn transform_get_local_position() -> Vector3;
+        fn transform_get_local_position_x() -> f32;
+        fn transform_get_local_position_y() -> f32;
+        fn transform_get_local_position_z() -> f32;
         fn transform_set_local_rotation(rotation: Quaternion);
         fn transform_get_local_rotation() -> Quaternion;
         fn transform_set_local_scale(scale: Vector3);

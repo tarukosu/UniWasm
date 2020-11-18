@@ -137,18 +137,22 @@ class AddComponent extends Rete.Component {
   }
 }
 
-class GetPositionComponent extends Rete.Component {
+class GetLocalPositionComponent extends Rete.Component {
   constructor() {
     super("GetPosition");
   }
 
   builder (node) {
-    var out1 = new Rete.Output('position', "Position", vector3Socket);
+    var out1 = new Rete.Output('output', "Position", vector3Socket);
     return node.addOutput(out1);
   }
 
   worker (node, inputs, outputs) {
-    outputs['position'] = [1, 2, 3];
+    outputs['output'] = [1, 2, 3];
+  }
+
+  code (node, inputs, add) {
+    add('output', `StaticArray.fromArray([transform_get_local_position_x(), transform_get_local_position_y(), transform_get_local_position_z()])`);
   }
 }
 
@@ -181,7 +185,13 @@ class Vector3Component extends Rete.Component {
   code (node, inputs, add) {
     // add('console.log("vec")')
     // console.log(node);
+    /*
+    add('output', 'new Array<f32>(3)');
+    `[${inputs['x'][0]}, ${inputs['y'][0]}, ${inputs['z'][0]}]`);
+    */
     add('output', `[${inputs['x'][0]}, ${inputs['y'][0]}, ${inputs['z'][0]}]`);
+    //add('output', `new Float32Array([1 as f32,2 as f32,3 as f32])`);
+    //add('output', `StaticArray.fromArray([1 as f32,2 as f32,3 as f32])`);
   }
 }
 
@@ -240,6 +250,7 @@ class SetLocalPositionComponent extends Rete.Component {
 
   code (node, inputs, add) {
     add(`transform_set_local_position(${inputs['input'][0]}[0] as f32, ${inputs['input'][0]}[1] as f32, ${inputs['input'][0]}[2] as f32)`);
+    //add(`transform_set_local_position(1 as f32, 2 as f32, 3 as f32)`);
     //add(`transform_set_local_position_x(parseFloat(${inputs['input'][0]}[0]) as f32)`);
     //add(`transform_set_local_position_x(${inputs['input'][0]}[0] as f32)`);
     //add(`const a = transform_get_local_position_x()`);
@@ -251,10 +262,10 @@ class SetLocalPositionComponent extends Rete.Component {
   var components = [
     new NumComponent(),
     new AddComponent(),
-    new GetPositionComponent(),
+    new GetLocalPositionComponent(),
     new DeconstructVector3Component(),
     new Vector3Component(),
-    new SetLocalPositionComponent()
+    new SetLocalPositionComponent(),
   ];
 
   var editor = new Rete.NodeEditor('demo@0.1.0', container);
@@ -277,10 +288,10 @@ class SetLocalPositionComponent extends Rete.Component {
   var n1 = await components[0].createNode({ num: 1.2 });
   var n2 = await components[0].createNode({ num: -1 });
   var n3 = await components[0].createNode({ num: 3 });
-  var n4 = await components[0].createNode({ num: 10 });
+  var n4 = await components[0].createNode({ num: 0.01 });
 
 
-  var vec = await components[4].createNode();
+  var vec = await components[2].createNode();
   var dec = await components[3].createNode();
   var add = await components[1].createNode();
   var new_vec = await components[4].createNode();
@@ -358,6 +369,8 @@ class SetLocalPositionComponent extends Rete.Component {
     const declare_code = `
     export declare function transform_set_local_position(x: f32, y: f32, z: f32): void;
     export declare function transform_get_local_position_x(): f32;
+    export declare function transform_get_local_position_y(): f32;
+    export declare function transform_get_local_position_z(): f32;
     `
 
     const update_func = `

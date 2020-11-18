@@ -1,0 +1,16 @@
+<body>
+    <primitive type="cube">
+        <script src="./wasm/translate_x.wasm"/>
+    <!--
+        <script src="./wasm/set_position.wasm"/>
+        -->
+    </primitive>
+
+<!--
+    <element position.x="3">
+        <primitive type="cube">
+            <script src="./wasm/circular_motion.wasm"/>
+        </primitive>
+    </element>
+    -->
+</body>

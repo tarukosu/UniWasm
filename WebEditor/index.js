@@ -71,7 +71,7 @@ export class TextControl extends Rete.Control {
     this.props = { emitter, ikey: key, readonly };
   }
 
-  setValue(val) {
+  setValue (val) {
     this.vueContext.value = val;
   }
 }
@@ -94,7 +94,7 @@ class NumComponent extends Rete.Component {
 
   code (node, inputs, add) {
     // add('console.log("number")')
-    add('num', node.data.num);
+    add('num', `${node.data.num} as f32`);
     //add('num', node.data.num); // add variable with value "node.data.num"
   }
 }
@@ -205,7 +205,7 @@ class DeconstructVector3Component extends Rete.Component {
 
   worker (node, inputs, outputs) {
     const vec = inputs['input'][0];
-    this.editor.nodes.find(n => n.id == node.id).controls.get('preview').setValue(vec[0]);
+    this.editor.nodes.find(n => n.id == node.id).controls.get('preview').setValue(vec);
 
     outputs['x'] = vec[0];
     outputs['y'] = vec[1];
@@ -215,15 +215,47 @@ class DeconstructVector3Component extends Rete.Component {
   }
 
   code (node, inputs, add) {
-   add('x', `${inputs['input'][0]}[0]`);
-   add('y', `${inputs['input'][0]}[1]`);
-   add('z', `${inputs['input'][0]}[2]`);
+    add('x', `${inputs['input'][0]}[0]`);
+    add('y', `${inputs['input'][0]}[1]`);
+    add('z', `${inputs['input'][0]}[2]`);
+  }
+}
+
+class SetLocalPositionComponent extends Rete.Component {
+  constructor() {
+    super("Set Local Position");
+  }
+
+  builder (node) {
+    var inp1 = new Rete.Input('input', "Vector3", vector3Socket);
+    return node
+      .addInput(inp1)
+      .addControl(new TextControl(this.editor, 'preview', true))
+  }
+
+  worker (node, inputs, outputs) {
+    const vec = inputs['input'][0];
+    this.editor.nodes.find(n => n.id == node.id).controls.get('preview').setValue(vec);
+  }
+
+  code (node, inputs, add) {
+    add(`transform_set_local_position(${inputs['input'][0]}[0] as f32, ${inputs['input'][0]}[1] as f32, ${inputs['input'][0]}[2] as f32)`);
+    //add(`transform_set_local_position_x(parseFloat(${inputs['input'][0]}[0]) as f32)`);
+    //add(`transform_set_local_position_x(${inputs['input'][0]}[0] as f32)`);
+    //add(`const a = transform_get_local_position_x()`);
   }
 }
 
 (async () => {
   var container = document.querySelector('#rete');
-  var components = [new NumComponent(), new AddComponent(), new GetPositionComponent(), new DeconstructVector3Component(), new Vector3Component()];
+  var components = [
+    new NumComponent(),
+    new AddComponent(),
+    new GetPositionComponent(),
+    new DeconstructVector3Component(),
+    new Vector3Component(),
+    new SetLocalPositionComponent()
+  ];
 
   var editor = new Rete.NodeEditor('demo@0.1.0', container);
 
@@ -246,12 +278,14 @@ class DeconstructVector3Component extends Rete.Component {
   var n2 = await components[0].createNode({ num: -1 });
   var n3 = await components[0].createNode({ num: 3 });
   var n4 = await components[0].createNode({ num: 10 });
-  
+
 
   var vec = await components[4].createNode();
   var dec = await components[3].createNode();
   var add = await components[1].createNode();
   var new_vec = await components[4].createNode();
+
+  var set_local_position = await components[5].createNode();
 
   n1.position = [0, 0];
   n2.position = [0, 200];
@@ -263,16 +297,19 @@ class DeconstructVector3Component extends Rete.Component {
   n4.position = [600, 400];
 
   new_vec.position = [1300, 200];
+  set_local_position.position = [1600, 200];
 
   editor.addNode(n1);
   editor.addNode(n2);
   editor.addNode(n3);
   editor.addNode(n4);
-  
+
   editor.addNode(vec);
   editor.addNode(dec);
   editor.addNode(add);
   editor.addNode(new_vec);
+
+  editor.addNode(set_local_position);
   /*
   editor.connect(n1.outputs.get('num'), add.inputs.get('num'));
   editor.connect(n2.outputs.get('num'), add.inputs.get('num2'));
@@ -292,6 +329,8 @@ class DeconstructVector3Component extends Rete.Component {
   editor.connect(dec.outputs.get('y'), new_vec.inputs.get('y'));
   editor.connect(dec.outputs.get('z'), new_vec.inputs.get('z'));
 
+  editor.connect(new_vec.outputs.get('output'), set_local_position.inputs.get('input'));
+
 
   editor.on('process nodecreated noderemoved connectioncreated connectionremoved', async () => {
     console.log('process');
@@ -305,14 +344,123 @@ class DeconstructVector3Component extends Rete.Component {
 
 
   window.setTimeout(async () => {
-    
+
     const json = editor.toJSON()
-    console.log(json);
-    
-    console.log(JSON.stringify(json, null, 2));
+    //console.log(json);
+    //console.log(JSON.stringify(json, null, 2));
     const sourceCode = await CodePlugin.generate(engine, editor.toJSON());
-    console.log(sourceCode);
+    //console.log(sourceCode);
   }, "1000");
 
 
+  async function generateCode () {
+    const code = await CodePlugin.generate(engine, editor.toJSON());
+    const declare_code = `
+    export declare function transform_set_local_position(x: f32, y: f32, z: f32): void;
+    export declare function transform_get_local_position_x(): f32;
+    `
+
+    const update_func = `
+    export function update(): void {
+    `
+      + code +
+      `}`
+    let full_code = declare_code + update_func;
+    // full_code = code;
+    console.log(full_code);
+
+    const { text, binary, stdout, stderr } = g_asc.compileString(full_code, {
+      optimizeLevel: 3,
+      runtime: "none"
+    });
+
+    console.log(stdout.toString());
+    console.log(stderr.toString());
+    console.log(g_asc);
+    console.log(text);
+    console.log(binary);
+    //var content = 'あいうえお';
+    //var blob = new Blob([ content ], { "type" : "text/plain" });
+
+    var blob = new Blob([binary.buffer], { type: "application/wasm" });
+    console.log(blob);
+    var objectUrl = URL.createObjectURL(blob);
+    console.log(objectUrl);
+    // window.open(objectUrl);
+
+    const a = document.createElement("a");
+    document.body.appendChild(a);
+    a.download = 'test.wasm';
+    a.href = objectUrl;
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(objectUrl);
+    //console.log(`>>> TEXT >>>\n${text}`);
+  }
+
+  document.getElementById("download").onclick = generateCode;
+
+  var g_asc;
+
+  require(["https://cdn.jsdelivr.net/npm/assemblyscript@latest/dist/sdk.js"], ({ asc }) => {
+    asc.ready.then(() => {
+      console.log("Running simple example...");
+      // asc = _asc;
+      g_asc = asc;
+      //simpleExample(asc);
+      generateCode();
+      console.log("\nRunning extended example...");
+      // extendedExample(asc);
+    });
+  });
+
+  const SOURCE_CODE = `export function test(): void {}`;
+
+  // This uses `asc.compileString`, a convenience API useful if all one wants to
+  // do is to quickly compile a single source string to WebAssembly.
+  async function simpleExample (asc) {
+    const code = await CodePlugin.generate(engine, editor.toJSON());
+    const { text, binary } = asc.compileString(code, {
+      optimizeLevel: 3,
+      runtime: "none"
+    });
+    console.log(`>>> TEXT >>>\n${text}`);
+    console.log(`>>> BINARY >>>\n${binary.length} bytes`);
+  }
+
+  /*
+  // The full API works very much like asc on the command line, with additional
+  // environment bindings being provided to access the (virtual) file system.
+  function extendedExample(asc) {
+    const stdout = asc.createMemoryStream();
+    const stderr = asc.createMemoryStream();
+    asc.main([
+      "module.ts",
+      "-O3",
+      "--runtime", "none",
+      "--binaryFile", "module.wasm",
+      "--textFile", "module.wat",
+      "--sourceMap"
+    ], {
+      stdout,
+      stderr,
+      readFile(name, baseDir) {
+        return name === "module.ts" ? SOURCE_CODE : null;
+      },
+      writeFile(name, data, baseDir) {
+        console.log(`>>> WRITE:${name} >>>\n${data.length}`);
+      },
+      listFiles(dirname, baseDir) {
+        return [];
+      }
+    }, err => {
+      console.log(`>>> STDOUT >>>\n${stdout.toString()}`);
+      console.log(`>>> STDERR >>>\n${stderr.toString()}`);
+      if (err) {
+        console.log(">>> THROWN >>>");
+        console.log(err);
+      }
+    });
+  }
+  */
 })();

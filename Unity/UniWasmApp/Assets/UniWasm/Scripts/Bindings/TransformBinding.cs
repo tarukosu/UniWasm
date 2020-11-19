@@ -31,6 +31,27 @@ namespace UniWasm
                      GetLocalPosition
                      ));
 
+            // get local position
+            importer.DefineFunction("transform_get_local_position_x",
+                 new DelegateFunctionDefinition(
+                     ValueType.Unit,
+                     ValueType.Float,
+                     _ => new object[] { transform.localPosition.x }
+                     ));
+
+            importer.DefineFunction("transform_get_local_position_y",
+                 new DelegateFunctionDefinition(
+                     ValueType.Unit,
+                     ValueType.Float,
+                     _ => new object[] { transform.localPosition.y }
+                     ));
+            importer.DefineFunction("transform_get_local_position_z",
+                 new DelegateFunctionDefinition(
+                     ValueType.Unit,
+                     ValueType.Float,
+                     _ => new object[] { transform.localPosition.z }
+                     ));
+            // set local position
             importer.DefineFunction("transform_set_local_rotation",
                  new DelegateFunctionDefinition(
                      ValueType.Quaternion,

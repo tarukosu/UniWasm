@@ -48,7 +48,9 @@ namespace UniWasm
                 "fd_prestat_get",
                 "fd_prestat_dir_name",
                 "environ_sizes_get",
-                "environ_get"
+                "environ_get",
+                //"env.abort",
+                "abort",
             };
 
             foreach (var wasiFunction in wasiFunctions)

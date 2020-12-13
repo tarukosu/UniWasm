@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Wasm;
 using Wasm.Interpret;
 
@@ -85,15 +84,6 @@ namespace UniWasm
             var exportedFunctions = module.ExportedFunctions;
             exportedFunctions.TryGetValue("update", out updateFunction);
             exportedFunctions.TryGetValue("on_touch_start", out onTouchStartFunction);
-
-            // event trigger
-            var eventTrigger = gameObject.AddComponent<EventTrigger>();
-            var entry = new EventTrigger.Entry()
-            {
-                eventID = EventTriggerType.PointerDown,
-            };
-            entry.callback.AddListener(_ => InvokeOnTouchStart());
-            eventTrigger.triggers.Add(entry);
         }
     }
 }

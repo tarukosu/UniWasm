@@ -136,12 +136,12 @@ namespace UniWasm
             return new Vector3(x, y, z);
         }
 
-        private void AttatchScript(string path, XmlNode node, Transform parent)
+        protected virtual WasmBehaviour AttatchScript(string path, XmlNode node, Transform parent)
         {
             var src = node.Attributes["src"];
             if (src == null)
             {
-                return;
+                return null;
             }
 
             Debug.Log(src.Value);
@@ -157,6 +157,7 @@ namespace UniWasm
             {
                 wasm.LoadWasm(srcPath, contentsStore);
             }
+            return wasm;
         }
 
         private Transform InstantiateElement(XmlNode node, Transform parent)

@@ -29,7 +29,10 @@ pub mod time {
     }
 }
 
-pub mod transform {
+pub mod common
+{
+    pub type ObjectId = i32;
+
     #[repr(C)]
     pub struct Vector3 {
         pub x: f32,
@@ -44,66 +47,67 @@ pub mod transform {
         pub z: f32,
         pub w: f32,
     }
+}
 
+pub mod transform {
+    pub use crate::common::ObjectId;
+    pub use crate::common::Vector3;
+    pub use crate::common::Quaternion;
 
-    pub fn set_local_position(position: Vector3)
+    pub fn set_local_position(object_id: ObjectId, position: Vector3)
     {
         unsafe
         {
-            transform_set_local_position(position);
+            transform_set_local_position(object_id, position);
         }
     }
 
-    pub fn get_local_position() -> Vector3
+    pub fn get_local_position(object_id: ObjectId) -> Vector3
     {
-        /*
         unsafe
         {
-            return transform_get_local_position();
-        }
-        */
-        unsafe
-        {
-            let x = transform_get_local_position_x();
-            let y = transform_get_local_position_y();
-            let z = transform_get_local_position_z();
+            let x = transform_get_local_position_x(object_id);
+            let y = transform_get_local_position_y(object_id);
+            let z = transform_get_local_position_z(object_id);
             Vector3 {
                 x, y, z
             }
         }
     }
 
-    pub fn set_local_rotation(rotation: Quaternion)
+    pub fn set_local_rotation(object_id: ObjectId, rotation: Quaternion)
     {
         unsafe
         {
-            transform_set_local_rotation(rotation);
+            transform_set_local_rotation(object_id, rotation);
         }
     }
 
-    pub fn get_local_rotation() -> Quaternion
+    /*
+    pub fn get_local_rotation(object_id: ObjectId) -> Quaternion
     {
         unsafe
         {
-            return transform_get_local_rotation();
+            return transform_get_local_rotation(object_id: ObjectId);
+        }
+    }
+    */
+
+    pub fn set_local_scale(object_id: ObjectId, scale: Vector3)
+    {
+        unsafe
+        {
+            transform_set_local_scale(object_id, scale);
         }
     }
 
-    pub fn set_local_scale(scale: Vector3)
+    pub fn get_local_scale(object_id: ObjectId) -> Vector3
     {
         unsafe
         {
-            transform_set_local_scale(scale);
-        }
-    }
-
-    pub fn get_local_scale() -> Vector3
-    {
-        unsafe
-        {
-            let x = transform_get_local_scale_x();
-            let y = transform_get_local_scale_y();
-            let z = transform_get_local_scale_z();
+            let x = transform_get_local_scale_x(object_id);
+            let y = transform_get_local_scale_y(object_id);
+            let z = transform_get_local_scale_z(object_id);
             Vector3 {
                 x, y, z
             }
@@ -111,24 +115,25 @@ pub mod transform {
     }
 
     extern "C" {
-        fn transform_set_local_position(position: Vector3);
+        fn transform_set_local_position(object_id: ObjectId, position: Vector3);
         // fn transform_get_local_position() -> Vector3;
-        fn transform_get_local_position_x() -> f32;
-        fn transform_get_local_position_y() -> f32;
-        fn transform_get_local_position_z() -> f32;
-        fn transform_set_local_rotation(rotation: Quaternion);
-        fn transform_get_local_rotation() -> Quaternion;
-        fn transform_set_local_scale(scale: Vector3);
+        fn transform_get_local_position_x(object_id: ObjectId) -> f32;
+        fn transform_get_local_position_y(object_id: ObjectId) -> f32;
+        fn transform_get_local_position_z(object_id: ObjectId) -> f32;
+        fn transform_set_local_rotation(object_id: ObjectId, rotation: Quaternion);
+        // fn transform_get_local_rotation() -> Quaternion;
+        fn transform_set_local_scale(object_id: ObjectId, scale: Vector3);
         // fn transform_get_local_scale() -> Vector3;
-        fn transform_get_local_scale_x() -> f32;
-        fn transform_get_local_scale_y() -> f32;
-        fn transform_get_local_scale_z() -> f32;
+        fn transform_get_local_scale_x(object_id: ObjectId) -> f32;
+        fn transform_get_local_scale_y(object_id: ObjectId) -> f32;
+        fn transform_get_local_scale_z(object_id: ObjectId) -> f32;
     }
 }
 
 
 pub mod object {
-    pub fn spawn_object(resource_id: i32) -> i32
+    pub use crate::common::ObjectId;
+    pub fn spawn_object(resource_id: i32) -> ObjectId
     {
         unsafe
         {
@@ -137,6 +142,24 @@ pub mod object {
     }
 
     extern "C" {
-        fn object_spawn_object(resource_id: i32) -> i32;
+        fn object_spawn_object(resource_id: i32) -> ObjectId;
+    }
+}
+
+pub mod physics {
+    pub use crate::common::ObjectId;
+    pub use crate::common::Vector3;
+    pub use crate::common::Quaternion;
+
+    pub fn set_velocity(object_id: ObjectId, velocity: Vector3)
+    {
+        unsafe
+        {
+            return physics_set_velocity(object_id, velocity);
+        }
+    }
+
+    extern "C" {
+        fn physics_set_velocity(object_id: ObjectId, velocity: Vector3);
     }
 }

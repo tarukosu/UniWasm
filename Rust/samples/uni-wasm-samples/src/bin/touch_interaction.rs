@@ -15,7 +15,7 @@ unsafe fn update() {
         return;
     }
 
-    let current_scale = transform::get_local_scale();
+    let current_scale = transform::get_local_scale(0);
 
     let x = if EXPANDING {
         let x = current_scale.x + 1.0 * 0.01;
@@ -42,7 +42,7 @@ unsafe fn update() {
         y: x,
         z: x,
     };
-    transform::set_local_scale(scale);
+    transform::set_local_scale(0, scale);
 }
 
 #[no_mangle]

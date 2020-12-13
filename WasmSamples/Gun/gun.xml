@@ -2,8 +2,8 @@
     <scene>
         <element>
             <primitive id="body" type="cube" scale.x="0.1" scale.y="0.1" scale.z="0.2">
+                <script src="./gun.wasm"/>
             </primitive>
-            <script src="./gun.wasm"/>
         </element>
     </scene>
 

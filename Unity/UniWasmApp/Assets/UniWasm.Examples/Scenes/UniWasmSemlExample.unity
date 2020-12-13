@@ -208,7 +208,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 349485714}
-  - component: {fileID: 349485713}
+  - component: {fileID: 349485715}
   m_Layer: 0
   m_Name: SemlLoader (2)
   m_TagString: Untagged
@@ -216,19 +216,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &349485713
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 349485712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0eb1bb2bffdd51849870064bc95467e6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  path: D:\work\3.Project\WebAssembly\UniWasm\WasmSamples\Gun\gun.xml
 --- !u!4 &349485714
 Transform:
   m_ObjectHideFlags: 0
@@ -243,6 +230,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &349485715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 349485712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55050c0eba9e6ce4b84a74d7802dc466, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  path: D:\work\3.Project\WebAssembly\UniWasm\WasmSamples\Gun\gun.xml
 --- !u!1 &410836971
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,7 +9,7 @@ fn update() {
     let speed = 1.0;
     let delta_t = time::get_delta_time();
 
-    let current_position = transform::get_local_position();
+    let current_position = transform::get_local_position(0);
     let mut x = current_position.x + speed * delta_t;
     if x > 2.0
     {
@@ -21,5 +21,5 @@ fn update() {
         y: current_position.y,
         z: current_position.z,
     };
-    transform::set_local_position(position);
+    transform::set_local_position(0, position);
 }

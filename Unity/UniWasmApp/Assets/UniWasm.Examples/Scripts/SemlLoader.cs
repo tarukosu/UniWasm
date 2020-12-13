@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace UniWasm
 {
@@ -12,8 +11,21 @@ namespace UniWasm
         [SerializeField]
         private string path = null;
 
+        private Transform resourceRoot;
+
+        private ContentsStore contentsStore;
+
         private void Awake()
         {
+            contentsStore = new ContentsStore()
+            {
+                RootTransform = transform
+            };
+
+            var resourceObject = new GameObject("resource");
+            resourceObject.SetActive(false);
+            resourceRoot = resourceObject.transform;
+            resourceRoot.SetParent(transform, false);
             LoadFromFile(path);
         }
 
@@ -22,9 +34,32 @@ namespace UniWasm
             var xmlDocument = new XmlDocument();
             xmlDocument.Load(path);
 
-            var body = xmlDocument.SelectSingleNode("//body");
+            var scene = xmlDocument.SelectSingleNode("//scene");
+            LoadScene(scene);
 
-            foreach (XmlNode node in body.ChildNodes)
+            var resource = xmlDocument.SelectSingleNode("//resource");
+            LoadResource(resource);
+        }
+
+        private void LoadResource(XmlNode resource)
+        {
+            Debug.Log("LoadResource");
+            foreach (XmlNode node in resource.ChildNodes)
+            {
+                var t = InstantiateNode(path, node, resourceRoot);
+
+                var id = ReadAttribute(node, "id", null);
+                if (!string.IsNullOrEmpty(id))
+                {
+                    Debug.Log(id);
+                    contentsStore.ResourceObjects.Add(id, t.gameObject);
+                }
+            }
+        }
+
+        private void LoadScene(XmlNode scene)
+        {
+            foreach (XmlNode node in scene.ChildNodes)
             {
                 /*
                 Debug.Log(node.ToString());
@@ -61,15 +96,8 @@ namespace UniWasm
 
             t.SetParent(parent, false);
 
-            var positionX = node.Attributes["position.x"];
-            if (positionX != null)
-            {
-                if (float.TryParse(positionX.Value, out var x))
-                {
-                    t.localPosition = new Vector3(x, 0, 0);
-                } 
-            }
-
+            t.localPosition = ReadVector3(node, "position", 0);
+            t.localScale = ReadVector3(node, "scale", 1);
 
             // child elements
             foreach (XmlNode child in node.ChildNodes)
@@ -80,10 +108,38 @@ namespace UniWasm
             return t;
         }
 
+        private string ReadAttribute(XmlNode node, string key, string defaultValue = "")
+        {
+            var value = node.Attributes[key];
+            if (value == null)
+            {
+                return defaultValue;
+            }
+            return value.Value;
+        }
+
+        private float ReadAttribute(XmlNode node, string key, float defaultValue = 0)
+        {
+            var stringValue = ReadAttribute(node, key, "");
+            if (float.TryParse(stringValue, out var value))
+            {
+                return value;
+            }
+            return defaultValue;
+        }
+
+        private Vector3 ReadVector3(XmlNode node, string key, float defaultValue = 0)
+        {
+            var x = ReadAttribute(node, $"{key}.x", defaultValue);
+            var y = ReadAttribute(node, $"{key}.y", defaultValue);
+            var z = ReadAttribute(node, $"{key}.z", defaultValue);
+            return new Vector3(x, y, z);
+        }
+
         private void AttatchScript(string path, XmlNode node, Transform parent)
         {
             var src = node.Attributes["src"];
-            if(src == null)
+            if (src == null)
             {
                 return;
             }
@@ -95,11 +151,11 @@ namespace UniWasm
             var wasm = parent.gameObject.AddComponent<WasmFromUrl>();
             if (srcPath.StartsWith("http"))
             {
-                _ = wasm.LoadWasmFromUrl(srcPath);
+                _ = wasm.LoadWasmFromUrl(srcPath, contentsStore);
             }
             else
             {
-                wasm.LoadWasm(srcPath);
+                wasm.LoadWasm(srcPath, contentsStore);
             }
         }
 
@@ -123,10 +179,15 @@ namespace UniWasm
                 case "cube":
                     primitiveType = PrimitiveType.Cube;
                     break;
+                case "sphere":
+                    primitiveType = PrimitiveType.Sphere;
+                    break;
+                case "cylinder":
+                    primitiveType = PrimitiveType.Cylinder;
+                    break;
             }
 
             var go = GameObject.CreatePrimitive(primitiveType);
-            // go.transform.SetParent(parent);
             return go.transform;
         }
     }

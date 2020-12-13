@@ -20,12 +20,31 @@ namespace UniWasm
             WasmValueType.Float32,
         };
 
+        public static IReadOnlyList<WasmValueType> ObjectId = new WasmValueType[]
+        {
+            WasmValueType.Int32,
+        };
+
+        public static IReadOnlyList<WasmValueType> Int = new WasmValueType[]
+        {
+            WasmValueType.Int32,
+        };
+
         public static IReadOnlyList<WasmValueType> Vector3 = new WasmValueType[]
         {
             WasmValueType.Float32,
             WasmValueType.Float32,
             WasmValueType.Float32,
         };
+
+        public static IReadOnlyList<WasmValueType> IdAndVector3 = new WasmValueType[]
+        {
+            WasmValueType.Int32,
+            WasmValueType.Float32,
+            WasmValueType.Float32,
+            WasmValueType.Float32,
+        };
+
         public static IReadOnlyList<WasmValueType> Quaternion = new WasmValueType[]
         {
             WasmValueType.Float32,

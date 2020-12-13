@@ -17,14 +17,14 @@ namespace UniWasm
             }
         }
 
-        public async Task LoadWasmFromUrl(string url)
+        public async Task LoadWasmFromUrl(string url, ContentsStore contentsStore = null)
         {
             var httpClient = new HttpClient();
             var result = await httpClient.GetAsync(url);
             if (result.IsSuccessStatusCode)
             {
                 var stream = await result.Content.ReadAsStreamAsync();
-                LoadWasm(stream);
+                LoadWasm(stream, contentsStore);
             }
         }
     }

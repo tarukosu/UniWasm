@@ -25,20 +25,25 @@ namespace UniWasm
             onTouchStartFunction?.Invoke(new object[0]);
         }
 
-        public void LoadWasm(string path)
+        public void LoadWasm(string path, ContentsStore store = null)
         {
             var file = WasmFile.ReadBinary(path);
-            LoadWasm(file);
+            LoadWasm(file, store);
         }
 
-        public void LoadWasm(Stream stream)
+        public void LoadWasm(Stream stream, ContentsStore store = null)
         {
             var file = WasmFile.ReadBinary(stream);
-            LoadWasm(file);
+            LoadWasm(file, store);
         }
 
-        protected void LoadWasm(WasmFile file)
+        protected void LoadWasm(WasmFile file, ContentsStore store = null)
         {
+            if (store == null)
+            {
+                store = new ContentsStore();
+            }
+
             var importer = new PredefinedImporter();
 
             var wasiFunctions = new List<string>()
@@ -63,8 +68,14 @@ namespace UniWasm
                          ));
             }
 
-            var transformBinding = new TransformBinding(transform);
+            var gameObjectBinding = new GameObjectBinding(transform, store);
+            importer.IncludeDefinitions(gameObjectBinding.Importer);
+
+            var transformBinding = new TransformBinding(transform, store);
             importer.IncludeDefinitions(transformBinding.Importer);
+
+            var physicsBinding = new PhysicsBinding(transform, store);
+            importer.IncludeDefinitions(physicsBinding.Importer);
 
             var timeBinding = new TimeBinding();
             importer.IncludeDefinitions(timeBinding.Importer);

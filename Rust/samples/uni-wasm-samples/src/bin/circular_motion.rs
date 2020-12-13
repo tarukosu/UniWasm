@@ -18,5 +18,5 @@ fn update() {
         y: y,
         z: 0.0,
     };
-    transform::set_local_position(position);
+    transform::set_local_position(0, position);
 }

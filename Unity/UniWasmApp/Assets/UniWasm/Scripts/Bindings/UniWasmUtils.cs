@@ -20,6 +20,11 @@ namespace UniWasm
             WasmValueType.Float32,
         };
 
+        public static IReadOnlyList<WasmValueType> Int = new WasmValueType[]
+        {
+            WasmValueType.Int32,
+        };
+
         public static IReadOnlyList<WasmValueType> Vector3 = new WasmValueType[]
         {
             WasmValueType.Float32,

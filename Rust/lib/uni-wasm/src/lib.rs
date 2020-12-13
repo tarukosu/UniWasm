@@ -112,16 +112,31 @@ pub mod transform {
 
     extern "C" {
         fn transform_set_local_position(position: Vector3);
-        fn transform_get_local_position() -> Vector3;
+        // fn transform_get_local_position() -> Vector3;
         fn transform_get_local_position_x() -> f32;
         fn transform_get_local_position_y() -> f32;
         fn transform_get_local_position_z() -> f32;
         fn transform_set_local_rotation(rotation: Quaternion);
         fn transform_get_local_rotation() -> Quaternion;
         fn transform_set_local_scale(scale: Vector3);
-        fn transform_get_local_scale() -> Vector3;
+        // fn transform_get_local_scale() -> Vector3;
         fn transform_get_local_scale_x() -> f32;
         fn transform_get_local_scale_y() -> f32;
         fn transform_get_local_scale_z() -> f32;
+    }
+}
+
+
+pub mod object {
+    pub fn spawn_object(resource_id: i32) -> i32
+    {
+        unsafe
+        {
+            return object_spawn_object(resource_id);
+        }
+    }
+
+    extern "C" {
+        fn object_spawn_object(resource_id: i32) -> i32;
     }
 }

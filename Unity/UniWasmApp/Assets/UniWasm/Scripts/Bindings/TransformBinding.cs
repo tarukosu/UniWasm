@@ -8,10 +8,12 @@ namespace UniWasm
     public class TransformBinding : BindingBase
     {
         private Transform transform;
+        private ContentsStore store;
 
-        public TransformBinding(Transform transform) : base()
+        public TransformBinding(Transform transform, ContentsStore store) : base()
         {
             this.transform = transform;
+            this.store = store;
         }
 
         public override PredefinedImporter GenerateImporter()

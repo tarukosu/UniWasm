@@ -21,35 +21,37 @@ namespace UniWasm
             var importer = new PredefinedImporter();
             importer.DefineFunction("transform_set_local_position",
                  new DelegateFunctionDefinition(
-                     ValueType.Vector3,
+                     ValueType.IdAndVector3,
                      ValueType.Unit,
                      SetLocalPosition
                      ));
 
+            /*
             importer.DefineFunction("transform_get_local_position",
                  new DelegateFunctionDefinition(
                      ValueType.Unit,
                      ValueType.Vector3,
                      GetLocalPosition
                      ));
+            */
 
             // get local position
             importer.DefineFunction("transform_get_local_position_x",
                  new DelegateFunctionDefinition(
-                     ValueType.Unit,
+                     ValueType.ObjectId,
                      ValueType.Float,
                      _ => new object[] { transform.localPosition.x }
                      ));
 
             importer.DefineFunction("transform_get_local_position_y",
                  new DelegateFunctionDefinition(
-                     ValueType.Unit,
+                     ValueType.ObjectId,
                      ValueType.Float,
                      _ => new object[] { transform.localPosition.y }
                      ));
             importer.DefineFunction("transform_get_local_position_z",
                  new DelegateFunctionDefinition(
-                     ValueType.Unit,
+                     ValueType.ObjectId,
                      ValueType.Float,
                      _ => new object[] { transform.localPosition.z }
                      ));
@@ -74,27 +76,30 @@ namespace UniWasm
                      SetLocalScale
                      ));
 
+            /*
             importer.DefineFunction("transform_get_local_scale",
                  new DelegateFunctionDefinition(
                      ValueType.Unit,
                      ValueType.Vector3,
                      GetLocalScale
                      ));
+            */
+
             importer.DefineFunction("transform_get_local_scale_x",
                  new DelegateFunctionDefinition(
-                     ValueType.Unit,
+                     ValueType.ObjectId,
                      ValueType.Float,
                      _ => new object[] { transform.localScale.x }
                      ));
             importer.DefineFunction("transform_get_local_scale_y",
                  new DelegateFunctionDefinition(
-                     ValueType.Unit,
+                     ValueType.ObjectId,
                      ValueType.Float,
                      _ => new object[] { transform.localScale.y }
                      ));
             importer.DefineFunction("transform_get_local_scale_z",
                  new DelegateFunctionDefinition(
-                     ValueType.Unit,
+                     ValueType.ObjectId,
                      ValueType.Float,
                      _ => new object[] { transform.localScale.z }
                      ));
@@ -121,13 +126,20 @@ namespace UniWasm
 
         private IReadOnlyList<object> SetLocalPosition(IReadOnlyList<object> arg)
         {
-            if (arg.Count != 3)
+            if (arg.Count != 4)
             {
                 return UniWasmUtils.Unit;
             }
-            var x = (float)arg[0];
-            var y = (float)arg[1];
-            var z = (float)arg[2];
+            var objectId = (int)arg[0];
+
+            var x = (float)arg[1];
+            var y = (float)arg[2];
+            var z = (float)arg[3];
+
+            if (!TryGetTransform(objectId, out var transform))
+            {
+                return UniWasmUtils.Unit;
+            }
 
             transform.localPosition = new Vector3(x, y, z);
             return UniWasmUtils.Unit;
@@ -170,6 +182,19 @@ namespace UniWasm
 
             transform.localScale = new Vector3(x, y, z);
             return UniWasmUtils.Unit;
+        }
+
+        private bool TryGetTransform(int objectId, out Transform transform)
+        {
+            var key = objectId.ToString();
+            if (!store.Objects.TryGetValue(key, out var gameObject))
+            {
+                transform = default;
+                return false;
+            }
+
+            transform = gameObject.transform;
+            return true;
         }
     }
 }

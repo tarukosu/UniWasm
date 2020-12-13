@@ -38,9 +38,11 @@ namespace UniWasm
             var resourceId = arg[0].ToString();
             if(store.ResourceObjects.TryGetValue(resourceId, out var resourceObject))
             {
+                var root = store.RootTransform;
                 var go = Object.Instantiate(resourceObject);
-                go.transform.SetParent(transform, false);
+                go.transform.SetParent(root, false);
                 var id = store.RegisterObject(go);
+                Debug.Log($"Spawn Object, ObjectId: {id}");
                 return new object[]
                 {
                     id

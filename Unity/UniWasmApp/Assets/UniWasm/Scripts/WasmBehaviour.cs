@@ -74,6 +74,9 @@ namespace UniWasm
             var transformBinding = new TransformBinding(transform, store);
             importer.IncludeDefinitions(transformBinding.Importer);
 
+            var physicsBinding = new PhysicsBinding(transform, store);
+            importer.IncludeDefinitions(physicsBinding.Importer);
+
             var timeBinding = new TimeBinding();
             importer.IncludeDefinitions(timeBinding.Importer);
 

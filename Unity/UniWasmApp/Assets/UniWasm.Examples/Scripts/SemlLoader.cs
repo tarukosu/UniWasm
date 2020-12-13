@@ -13,10 +13,15 @@ namespace UniWasm
 
         private Transform resourceRoot;
 
-        private ContentsStore contentsStore = new ContentsStore();
+        private ContentsStore contentsStore;
 
         private void Awake()
         {
+            contentsStore = new ContentsStore()
+            {
+                RootTransform = transform
+            };
+
             var resourceObject = new GameObject("resource");
             resourceObject.SetActive(false);
             resourceRoot = resourceObject.transform;
@@ -101,11 +106,6 @@ namespace UniWasm
             }
 
             return t;
-        }
-
-        private Transform InstantiateEmptyObject(XmlNode node, Transform parent)
-        {
-            throw new System.NotImplementedException();
         }
 
         private string ReadAttribute(XmlNode node, string key, string defaultValue = "")

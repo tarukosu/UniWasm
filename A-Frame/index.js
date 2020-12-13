@@ -81,6 +81,24 @@ function generateImportObject (el) {
       },
       time_get_time: () => { },
       time_get_delta_time: () => { return 0.016 },
+      abort: () => {},
+    },
+    input: {
+      transform_set_local_position: (x, y, z) => {
+        el.setAttribute('position', {x, y, z});
+      },
+      transform_get_local_position_x: () => {
+        var position = el.getAttribute('position');
+        return position.x;
+      },
+      transform_get_local_position_y: () => {
+        var position = el.getAttribute('position');
+        return position.y;
+      },
+      transform_get_local_position_z: () => {
+        var position = el.getAttribute('position');
+        return position.z;
+      },
     }
   }
   return importObject;

@@ -62,6 +62,14 @@ pub mod transform {
         }
     }
 
+    pub fn set_world_position(object_id: ObjectId, position: Vector3)
+    {
+        unsafe
+        {
+            transform_set_world_position(object_id, position);
+        }
+    }
+
     pub fn get_local_position(object_id: ObjectId) -> Vector3
     {
         unsafe
@@ -69,6 +77,32 @@ pub mod transform {
             let x = transform_get_local_position_x(object_id);
             let y = transform_get_local_position_y(object_id);
             let z = transform_get_local_position_z(object_id);
+            Vector3 {
+                x, y, z
+            }
+        }
+    }
+
+    pub fn get_world_position(object_id: ObjectId) -> Vector3
+    {
+        unsafe
+        {
+            let x = transform_get_world_position_x(object_id);
+            let y = transform_get_world_position_y(object_id);
+            let z = transform_get_world_position_z(object_id);
+            Vector3 {
+                x, y, z
+            }
+        }
+    }
+
+    pub fn get_world_forward(object_id: ObjectId) -> Vector3
+    {
+        unsafe
+        {
+            let x = transform_get_world_forward_x(object_id);
+            let y = transform_get_world_forward_y(object_id);
+            let z = transform_get_world_forward_z(object_id);
             Vector3 {
                 x, y, z
             }
@@ -116,10 +150,19 @@ pub mod transform {
 
     extern "C" {
         fn transform_set_local_position(object_id: ObjectId, position: Vector3);
-        // fn transform_get_local_position() -> Vector3;
         fn transform_get_local_position_x(object_id: ObjectId) -> f32;
         fn transform_get_local_position_y(object_id: ObjectId) -> f32;
         fn transform_get_local_position_z(object_id: ObjectId) -> f32;
+
+        fn transform_set_world_position(object_id: ObjectId, position: Vector3);
+        fn transform_get_world_position_x(object_id: ObjectId) -> f32;
+        fn transform_get_world_position_y(object_id: ObjectId) -> f32;
+        fn transform_get_world_position_z(object_id: ObjectId) -> f32;
+
+        fn transform_get_world_forward_x(object_id: ObjectId) -> f32;
+        fn transform_get_world_forward_y(object_id: ObjectId) -> f32;
+        fn transform_get_world_forward_z(object_id: ObjectId) -> f32;
+
         fn transform_set_local_rotation(object_id: ObjectId, rotation: Quaternion);
         // fn transform_get_local_rotation() -> Quaternion;
         fn transform_set_local_scale(object_id: ObjectId, scale: Vector3);
@@ -151,15 +194,26 @@ pub mod physics {
     pub use crate::common::Vector3;
     pub use crate::common::Quaternion;
 
-    pub fn set_velocity(object_id: ObjectId, velocity: Vector3)
+    /*
+    pub fn set_local_velocity(object_id: ObjectId, velocity: Vector3)
     {
         unsafe
         {
-            return physics_set_velocity(object_id, velocity);
+            return physics_set_local_velocity(object_id, velocity);
+        }
+    }
+    */
+
+    pub fn set_world_velocity(object_id: ObjectId, velocity: Vector3)
+    {
+        unsafe
+        {
+            return physics_set_world_velocity(object_id, velocity);
         }
     }
 
     extern "C" {
-        fn physics_set_velocity(object_id: ObjectId, velocity: Vector3);
+        // fn physics_set_local_velocity(object_id: ObjectId, velocity: Vector3);
+        fn physics_set_world_velocity(object_id: ObjectId, velocity: Vector3);
     }
 }

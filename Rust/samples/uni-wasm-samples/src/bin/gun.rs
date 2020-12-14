@@ -6,14 +6,9 @@ fn main() {
 }
 
 #[no_mangle]
-fn update() {
-    // object::spawn_object(1);
-}
-
-#[no_mangle]
-unsafe fn on_touch_start() {
+unsafe fn on_use() {
     let object_id = object::spawn_object(1);
-    
+
     let gun_position = transform::get_world_position(0);
     let forward = transform::get_world_forward(object_id);
 
@@ -26,8 +21,7 @@ unsafe fn on_touch_start() {
 
     transform::set_world_position(object_id, position);
 
-    let speed = 1.0;
-    
+    let speed = 4.0;
 
     let velocity = transform::Vector3 {
         x: forward.x * speed,

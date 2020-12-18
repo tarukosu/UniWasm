@@ -12,16 +12,16 @@ namespace UniWasm
         private ModuleInstance module;
         private FunctionDefinition updateFunction;
         private FunctionDefinition onTouchStartFunction;
+        private FunctionDefinition onUseFunction;
 
         protected virtual void Update()
         {
             updateFunction?.Invoke(new object[0]);
         }
 
-        public void InvokeOnTouchStart()
+        public void InvokeOnUse()
         {
-            Debug.Log("invoke on touch start");
-            onTouchStartFunction?.Invoke(new object[0]);
+            onUseFunction?.Invoke(new object[0]);
         }
 
         public void LoadWasm(string path, ContentsStore store = null)
@@ -84,6 +84,7 @@ namespace UniWasm
             var exportedFunctions = module.ExportedFunctions;
             exportedFunctions.TryGetValue("update", out updateFunction);
             exportedFunctions.TryGetValue("on_touch_start", out onTouchStartFunction);
+            exportedFunctions.TryGetValue("on_use", out onUseFunction);
         }
     }
 }

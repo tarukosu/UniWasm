@@ -46,7 +46,7 @@ public class GrabbableObject : MonoBehaviour
             return;
         }
 
-        wasm.InvokeOnTouchStart();
+        wasm.InvokeOnUse();
 
     }
 

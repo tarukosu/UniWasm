@@ -20,7 +20,7 @@ namespace UniWasm
                 {
                     eventID = EventTriggerType.PointerDown,
                 };
-                entry.callback.AddListener(_ => wasm.InvokeOnTouchStart());
+                entry.callback.AddListener(_ => wasm.InvokeOnUse());
                 eventTrigger.triggers.Add(entry);
             }
             return wasm;

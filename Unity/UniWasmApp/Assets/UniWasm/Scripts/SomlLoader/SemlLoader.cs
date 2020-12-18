@@ -166,7 +166,7 @@ namespace UniWasm
             return go.transform;
         }
 
-        private Transform InstantiatePrimitive(XmlNode node, Transform parent)
+        protected virtual Transform InstantiatePrimitive(XmlNode node, Transform parent)
         {
             var type = node.Attributes["type"];
             if (type == null)

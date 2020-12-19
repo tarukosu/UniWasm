@@ -1,11 +1,19 @@
 {
   "scopedRegistries": [
     {
-        "name": "Microsoft",
-        "url": "https://pkgs.dev.azure.com/UnityDeveloperTools/MSBuildForUnity/_packaging/UnityDeveloperTools/npm/registry/",
-        "scopes": [
-            "com.microsoft"
-        ]
+      "name": "Microsoft",
+      "url": "https://pkgs.dev.azure.com/UnityDeveloperTools/MSBuildForUnity/_packaging/UnityDeveloperTools/npm/registry/",
+      "scopes": [
+        "com.microsoft"
+      ]
+    },
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.atteneder.gltfast",
+        "com.openupm"
+      ]
     }
   ],
   "dependencies": {
@@ -47,6 +55,7 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0"
+    "com.unity.modules.xr": "1.0.0",
+    "com.atteneder.gltfast": "2.5.0"
   }
 }

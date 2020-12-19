@@ -1,13 +1,26 @@
 <soml>
     <scene>
         <element>
-            <primitive id="body" type="cube" scale.x="0.1" scale.y="0.1" scale.z="0.2">
+            <model src="./gun.glb"
+                position.x="0.1" position.y="1">
+                <script src="./gun.wasm"/>
+            </model>
+            <!--
+            <primitive id="body" type="cube"
+                position.x="0.1" position.y="1"
+                scale.x="0.1" scale.y="0.1" scale.z="0.2">
                 <script src="./gun.wasm"/>
             </primitive>
+            -->
         </element>
     </scene>
 
     <resource>
-        <primitive id="1" type="sphere" scale.x="0.05" scale.y="0.05" scale.z="0.05"/>
+        <model id="1" src="./bullet.glb"/>
+        <!--
+
+        <primitive id="1" type="sphere"
+            scale.x="0.05" scale.y="0.05" scale.z="0.05"/>
+            -->
     </resource>
 </soml>

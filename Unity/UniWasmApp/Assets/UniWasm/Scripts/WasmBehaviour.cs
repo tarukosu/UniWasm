@@ -81,6 +81,8 @@ namespace UniWasm
 
             module = ModuleInstance.Instantiate(file, importer);
 
+            gameObjectBinding.ModuleInstance = module;
+
             var exportedFunctions = module.ExportedFunctions;
             exportedFunctions.TryGetValue("update", out updateFunction);
             exportedFunctions.TryGetValue("on_touch_start", out onTouchStartFunction);

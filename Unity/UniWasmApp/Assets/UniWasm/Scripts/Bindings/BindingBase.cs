@@ -6,6 +6,7 @@ namespace UniWasm
 {
     public abstract class BindingBase
     {
+        public ModuleInstance ModuleInstance { set; get; }
         public PredefinedImporter Importer { private set; get; }
 
         public BindingBase()

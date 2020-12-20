@@ -62,5 +62,15 @@ namespace UniWasm
             WasmValueType.Float32,
         };
 
+        public static IReadOnlyList<WasmValueType> Int64 = new WasmValueType[]
+        {
+            WasmValueType.Int64,
+        };
+
+        public static IReadOnlyList<WasmValueType> String = new WasmValueType[]
+        {
+            WasmValueType.Int64,
+            WasmValueType.Int64,
+        };
     }
 }

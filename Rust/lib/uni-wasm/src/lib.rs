@@ -117,6 +117,28 @@ pub mod transform {
         }
     }
 
+    pub fn get_world_rotation(object_id: ObjectId) -> Quaternion
+    {
+        unsafe
+        {
+            let x = transform_get_world_rotation_x(object_id);
+            let y = transform_get_world_rotation_y(object_id);
+            let z = transform_get_world_rotation_z(object_id);
+            let w = transform_get_world_rotation_w(object_id);
+            Quaternion {
+                x, y, z, w
+            }
+        }
+    }
+
+    pub fn set_world_rotation(object_id: ObjectId, rotation: Quaternion)
+    {
+        unsafe
+        {
+            transform_set_world_rotation(object_id, rotation);
+        }
+    }
+
     /*
     pub fn get_local_rotation(object_id: ObjectId) -> Quaternion
     {
@@ -164,6 +186,13 @@ pub mod transform {
         fn transform_get_world_forward_z(object_id: ObjectId) -> f32;
 
         fn transform_set_local_rotation(object_id: ObjectId, rotation: Quaternion);
+
+        fn transform_get_world_rotation_x(object_id: ObjectId) -> f32;
+        fn transform_get_world_rotation_y(object_id: ObjectId) -> f32;
+        fn transform_get_world_rotation_z(object_id: ObjectId) -> f32;
+        fn transform_get_world_rotation_w(object_id: ObjectId) -> f32;
+
+        fn transform_set_world_rotation(object_id: ObjectId, rotation: Quaternion);
         // fn transform_get_local_rotation() -> Quaternion;
         fn transform_set_local_scale(object_id: ObjectId, scale: Vector3);
         // fn transform_get_local_scale() -> Vector3;

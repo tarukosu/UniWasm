@@ -52,5 +52,15 @@ namespace UniWasm
             WasmValueType.Float32,
             WasmValueType.Float32,
         };
+
+        public static IReadOnlyList<WasmValueType> IdAndQuaternion = new WasmValueType[]
+        {
+            WasmValueType.Int32,
+            WasmValueType.Float32,
+            WasmValueType.Float32,
+            WasmValueType.Float32,
+            WasmValueType.Float32,
+        };
+
     }
 }

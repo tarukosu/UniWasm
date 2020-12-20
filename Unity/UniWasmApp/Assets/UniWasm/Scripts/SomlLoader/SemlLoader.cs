@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -23,7 +24,8 @@ namespace UniWasm
             };
 
             var resourceObject = new GameObject("resource");
-            resourceObject.SetActive(false);
+            resourceObject.transform.localScale = Vector3.zero;
+            // resourceObject.SetActive(false);
             resourceRoot = resourceObject.transform;
             resourceRoot.SetParent(transform, false);
             LoadFromFile(path);
@@ -47,6 +49,10 @@ namespace UniWasm
             foreach (XmlNode node in resource.ChildNodes)
             {
                 var t = InstantiateNode(path, node, resourceRoot);
+                if (t == null)
+                {
+                    continue;
+                }
 
                 var id = ReadAttribute(node, "id", null);
                 if (!string.IsNullOrEmpty(id))
@@ -84,8 +90,16 @@ namespace UniWasm
                 case "element":
                     t = InstantiateElement(node, parent);
                     break;
+                case "model":
+                    t = InstantiateModel(node, parent);
+                    break;
                 case "script":
                     AttatchScript(path, node, parent);
+                    break;
+                case "#comment":
+                    break;
+                default:
+                    Debug.LogWarning($"Tag:{tag} is invalid");
                     break;
             }
 
@@ -110,12 +124,20 @@ namespace UniWasm
 
         private string ReadAttribute(XmlNode node, string key, string defaultValue = "")
         {
-            var value = node.Attributes[key];
-            if (value == null)
+            try
             {
-                return defaultValue;
+                var value = node.Attributes[key];
+                if (value == null)
+                {
+                    return defaultValue;
+                }
+                return value.Value;
             }
-            return value.Value;
+            catch (Exception e)
+            {
+                Debug.LogWarning(e);
+                return null;
+            }
         }
 
         private float ReadAttribute(XmlNode node, string key, float defaultValue = 0)
@@ -145,7 +167,7 @@ namespace UniWasm
             }
 
             Debug.Log(src.Value);
-            var srcPath = Path.Combine(path, "..", src.Value);
+            var srcPath = GetAbsolutePath(path, src.Value);
             Debug.Log(srcPath);
 
             var wasm = parent.gameObject.AddComponent<WasmFromUrl>();
@@ -163,6 +185,22 @@ namespace UniWasm
         private Transform InstantiateElement(XmlNode node, Transform parent)
         {
             var go = new GameObject();
+            return go.transform;
+        }
+
+        private Transform InstantiateModel(XmlNode node, Transform parent)
+        {
+            if (!node.TryGetAttribute("src", out var src))
+            {
+                return InstantiateElement(node, parent);
+            }
+
+            var srcPath = GetAbsolutePath(path, src);
+            Debug.Log(srcPath);
+            var go = new GameObject();
+            var gltf = go.AddComponent<GltfEntity>();
+            // var gltf = go.AddComponent<GLTFast.GltfAsset>();
+            gltf.Load(srcPath);
             return go.transform;
         }
 
@@ -190,6 +228,28 @@ namespace UniWasm
 
             var go = GameObject.CreatePrimitive(primitiveType);
             return go.transform;
+        }
+
+        private string GetAbsolutePath(string basePath, string relativePath)
+        {
+            var path = Path.Combine(basePath, "..", relativePath);
+            return path;
+        }
+    }
+
+    static class XmlNodeExtensions
+    {
+        public static bool TryGetAttribute(this XmlNode node, string key, out string value)
+        {
+            var type = node.Attributes[key];
+            if (type == null)
+            {
+                value = null;
+                return false;
+            }
+
+            value = type.Value;
+            return true;
         }
     }
 }

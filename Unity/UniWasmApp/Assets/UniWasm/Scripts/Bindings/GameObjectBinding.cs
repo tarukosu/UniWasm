@@ -42,6 +42,7 @@ namespace UniWasm
                 var go = Object.Instantiate(resourceObject);
                 go.transform.SetParent(root, false);
                 var id = store.RegisterObject(go);
+                go.name = id.ToString();
                 Debug.Log($"Spawn Object, ObjectId: {id}");
                 return new object[]
                 {

@@ -12,7 +12,7 @@ unsafe fn on_use() {
     let gun_position = transform::get_world_position(0);
     let forward = transform::get_world_forward(object_id);
 
-    let offset = 0.2;
+    let offset = 0.5;
     let position = transform::Vector3 {
         x: gun_position.x + offset * forward.x,
         y: gun_position.y + offset * forward.y,
@@ -20,6 +20,9 @@ unsafe fn on_use() {
     };
 
     transform::set_world_position(object_id, position);
+
+    let rotation = transform::get_world_rotation(0);
+    transform::set_world_rotation(object_id, rotation);
 
     let speed = 4.0;
 

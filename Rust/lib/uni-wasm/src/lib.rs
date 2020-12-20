@@ -208,6 +208,24 @@ pub mod element {
     pub use crate::common::ElementIndex;
     pub use crate::common::ResourceIndex;
     
+    pub fn spawn_object_by_id(resource_id: &str) -> Result<ElementIndex, &str>
+    {
+        let resource_index = get_resource_index_by_id(resource_id);
+        if resource_index < 0
+        {
+            Err("Resource not found")
+        }else{
+            let element_index = spawn_object(resource_index);
+            if element_index < 0
+            {
+                Err("Spawn failed")
+            }else{
+                Ok(element_index)
+            }
+        }
+    }
+
+
     pub fn spawn_object(resource_index: ResourceIndex) -> ElementIndex
     {
         unsafe
@@ -216,11 +234,13 @@ pub mod element {
         }
     }
 
-    pub fn get_resource_index_by_id(id: &str) -> ResourceIndex
+    pub fn get_resource_index_by_id(resource_id: &str) -> ResourceIndex
     {
         unsafe
         {
-            return element_get_resource_index_by_id(id.as_ptr() as usize, id.len());
+            let ptr = resource_id.as_ptr() as usize;
+            let len = resource_id.len();
+            return element_get_resource_index_by_id(ptr, len);
         }
     }
 

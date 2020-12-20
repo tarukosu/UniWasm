@@ -1,13 +1,26 @@
 use uni_wasm::transform;
-use uni_wasm::object;
+use uni_wasm::element;
 use uni_wasm::physics;
 
 fn main() {
+    let bullet_index = element::get_resource_index_by_id("123");
+    print!("{}", bullet_index);
 }
+
+/*
+#[no_mangle]
+unsafe fn update() {
+    let bullet_index = element::get_resource_index_by_id("123ab");
+    print!("{}", bullet_index);
+}
+*/
 
 #[no_mangle]
 unsafe fn on_use() {
-    let object_id = object::spawn_object(1);
+    let bullet_index = element::get_resource_index_by_id("bullet");
+    print!("{}", bullet_index);
+
+    let object_id = element::spawn_object(1);
 
     let gun_position = transform::get_world_position(0);
     let forward = transform::get_world_forward(object_id);

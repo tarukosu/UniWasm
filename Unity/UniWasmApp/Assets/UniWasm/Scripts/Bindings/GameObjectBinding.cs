@@ -38,11 +38,12 @@ namespace UniWasm
 
         private IReadOnlyList<object> GetResourceIndexById(IReadOnlyList<object> arg)
         {
-            var ptr = (int)arg[0];
-            var length = (int)arg[1];
+            var parser = new ArgumentParser(arg, ModuleInstance);
+            if (!parser.TryReadString(out var text))
+            {
+                return UniWasmUtils.Unit;
+            }
 
-            var memory = ModuleInstance.Memories[0];
-            var text = ReadString(memory, ptr, length);
             Debug.Log(text);
 
             return new object[]{
@@ -73,18 +74,6 @@ namespace UniWasm
             }
 
             return UniWasmUtils.Unit;
-        }
-
-        internal static string ReadString(LinearMemory memory, int pointer, int length)
-        {
-            var data = new byte[length];
-            for (var i = 0; i < length; i++)
-            {
-                var index = (uint)(pointer + i);
-                data[i] = (byte)memory.Int8[index];
-            }
-            var text = Encoding.UTF8.GetString(data);
-            return text;
         }
     }
 }

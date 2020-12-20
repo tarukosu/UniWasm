@@ -18,9 +18,7 @@ unsafe fn update() {
 #[no_mangle]
 unsafe fn on_use() {
     let bullet_index = element::get_resource_index_by_id("bullet");
-    print!("{}", bullet_index);
-
-    let object_id = element::spawn_object(1);
+    let object_id = element::spawn_object(bullet_index);
 
     let gun_position = transform::get_world_position(0);
     let forward = transform::get_world_forward(object_id);

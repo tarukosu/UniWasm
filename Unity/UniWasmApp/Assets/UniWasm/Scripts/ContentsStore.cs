@@ -20,6 +20,17 @@ namespace UniWasm
 
         public Transform RootTransform;
 
+        public ContentsStore()
+        {
+            // Resource index 0 is empty
+            var emptyResource = new Resource()
+            {
+                Id = "",
+                GameObject = null
+            };
+            Resources.Add(emptyResource);
+        }
+
         public int RegisterObject(GameObject gameObject)
         {
             var id = idCounter;
@@ -46,12 +57,12 @@ namespace UniWasm
 
         public bool TryGetResourceByResourceIndex(int resourceIndex, out Resource resource)
         {
-            if (resourceIndex <= 0 || resourceIndex > Resources.Count)
+            if (resourceIndex <= 0 || resourceIndex > Resources.Count - 1)
             {
                 resource = null;
                 return false;
             }
-            resource = Resources[resourceIndex - 1];
+            resource = Resources[resourceIndex];
             return true;
         }
     }

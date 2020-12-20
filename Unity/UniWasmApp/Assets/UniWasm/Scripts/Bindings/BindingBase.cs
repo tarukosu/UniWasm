@@ -61,6 +61,28 @@ namespace UniWasm
             }
         }
 
+        public bool TryReadLong(out long value)
+        {
+            if (!TryReadObject(out var valueObject))
+            {
+                value = 0;
+                return false;
+            }
+
+            try
+            {
+                value = (long)(int)valueObject;
+                return true;
+            }
+            catch (Exception e)
+            {
+                value = 0;
+                Debug.LogWarning(e);
+                return false;
+            }
+        }
+
+
         public bool TryReadString(out string value)
         {
             if (!TryReadInt(out var pointer) || !TryReadInt(out var length))
@@ -92,7 +114,6 @@ namespace UniWasm
 
         private bool TryReadObject(out object value)
         {
-            //var nextIndex = index + 1;
             if (arg.Count <= index)
             {
                 value = null;

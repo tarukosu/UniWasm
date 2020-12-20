@@ -32,7 +32,7 @@ pub mod time {
 pub mod common
 {
     pub type ElementId = i32;
-    pub type ResourceIndex = i64;
+    pub type ResourceIndex = i32;
 
     #[repr(C)]
     pub struct Vector3 {

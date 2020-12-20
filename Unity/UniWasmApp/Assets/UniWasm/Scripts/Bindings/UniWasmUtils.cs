@@ -8,7 +8,15 @@ namespace UniWasm
     public static class UniWasmUtils
     {
         public static IReadOnlyList<object> Unit = new object[0];
+    }
 
+    public static class ReturnValue
+    {
+        public static IReadOnlyList<object> Unit = new object[0];
+        public static IReadOnlyList<object> FromObject(object result1)
+        {
+            return new object[] { result1 };
+        }
     }
 
     public static class ValueType
@@ -69,8 +77,8 @@ namespace UniWasm
 
         public static IReadOnlyList<WasmValueType> String = new WasmValueType[]
         {
-            WasmValueType.Int64,
-            WasmValueType.Int64,
+            WasmValueType.Int32,
+            WasmValueType.Int32,
         };
     }
 }

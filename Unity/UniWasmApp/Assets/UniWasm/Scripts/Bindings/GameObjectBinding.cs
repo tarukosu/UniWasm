@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using Wasm.Interpret;
 
@@ -30,50 +29,61 @@ namespace UniWasm
             importer.DefineFunction("element_get_resource_index_by_id",
                  new DelegateFunctionDefinition(
                      ValueType.String,
-                     ValueType.Int64,
+                     ValueType.Int,
                      GetResourceIndexById
                      ));
             return importer;
         }
 
+        private IReadOnlyList<object> InvalidResourceIndex
+        {
+            get => ReturnValue.FromObject(-1);
+        }
+        private IReadOnlyList<object> InvalidElementIndex
+        {
+            get => ReturnValue.FromObject(-1);
+        }
+
         private IReadOnlyList<object> GetResourceIndexById(IReadOnlyList<object> arg)
         {
             var parser = new ArgumentParser(arg, ModuleInstance);
-            if (!parser.TryReadString(out var text))
+            if (!parser.TryReadString(out var id))
             {
-                return UniWasmUtils.Unit;
+                return InvalidResourceIndex;
             }
 
-            Debug.Log(text);
+            Debug.Log("GetResourceIndex");
+            Debug.Log(id);
 
-            return new object[]{
-                (long)0
-            };
+            if (!store.TryGetResourceIndexById(id, out var resourceIndex))
+            {
+                return InvalidResourceIndex;
+            }
+
+            Debug.Log(resourceIndex);
+            return ReturnValue.FromObject(resourceIndex);
         }
 
         private IReadOnlyList<object> SpawnObject(IReadOnlyList<object> arg)
         {
-            if (arg.Count != 1)
+            var parser = new ArgumentParser(arg);
+            if (!parser.TryReadInt(out var resourceIndex))
             {
-                return UniWasmUtils.Unit;
+                return InvalidElementIndex;
             }
 
-            var resourceId = arg[0].ToString();
-            if (store.ResourceObjects.TryGetValue(resourceId, out var resourceObject))
+            if (!store.TryGetResourceByResourceIndex(resourceIndex, out var resource))
             {
-                var root = store.RootTransform;
-                var go = Object.Instantiate(resourceObject);
-                go.transform.SetParent(root, false);
-                var id = store.RegisterObject(go);
-                go.name = id.ToString();
-                Debug.Log($"Spawn Object, ObjectId: {id}");
-                return new object[]
-                {
-                    id
-                };
+                return InvalidElementIndex;
             }
 
-            return UniWasmUtils.Unit;
+            var root = store.RootTransform;
+            var go = Object.Instantiate(resource.GameObject);
+            go.transform.SetParent(root, false);
+            var elementIndex = store.RegisterObject(go);
+            go.name = $"{resource.Id}, {elementIndex}";
+            Debug.Log($"Spawn Object, ElementIndex: {elementIndex}");
+            return ReturnValue.FromObject(elementIndex);
         }
     }
 }

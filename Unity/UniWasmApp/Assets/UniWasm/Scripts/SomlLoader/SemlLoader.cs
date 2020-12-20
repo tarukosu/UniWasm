@@ -43,10 +43,10 @@ namespace UniWasm
             LoadResource(resource);
         }
 
-        private void LoadResource(XmlNode resource)
+        private void LoadResource(XmlNode resourceNode)
         {
             Debug.Log("LoadResource");
-            foreach (XmlNode node in resource.ChildNodes)
+            foreach (XmlNode node in resourceNode.ChildNodes)
             {
                 var t = InstantiateNode(path, node, resourceRoot);
                 if (t == null)
@@ -55,11 +55,22 @@ namespace UniWasm
                 }
 
                 var id = ReadAttribute(node, "id", null);
+
+                var resource = new Resource()
+                {
+                    Id = id,
+                    GameObject = t.gameObject
+                };
+                contentsStore.RegisterResource(resource);
+
+                /*
                 if (!string.IsNullOrEmpty(id))
                 {
                     Debug.Log(id);
-                    contentsStore.ResourceObjects.Add(id, t.gameObject);
+                    // contentsStore.ResourceObjects.Add(id, t.gameObject);
+                    // contentsStore.ResourceObjects.Add(id, t.gameObject);
                 }
+                */
             }
         }
 

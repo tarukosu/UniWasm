@@ -9,6 +9,6 @@
     </scene>
 
     <resource>
-        <model id="1" src="./bullet.glb"/>
+        <model id="bullet" src="./bullet.glb"/>
     </resource>
 </soml>

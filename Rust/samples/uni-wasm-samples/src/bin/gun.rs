@@ -21,6 +21,9 @@ unsafe fn on_use() {
 
     transform::set_world_position(object_id, position);
 
+    let rotation = transform::get_world_rotation(0);
+    transform::set_world_rotation(object_id, rotation);
+
     let speed = 4.0;
 
     let velocity = transform::Vector3 {

@@ -61,7 +61,7 @@ namespace UniWasm
                      ValueType.Float,
                      _ => new object[] { transform.localPosition.z }
                      ));
-            
+
             importer.DefineFunction("transform_get_world_position_x",
                  new DelegateFunctionDefinition(
                      ValueType.ObjectId,
@@ -115,7 +115,7 @@ namespace UniWasm
                      ValueType.Float,
                      _ => new object[] { transform.localPosition.z }
                      ));
-            // set local position
+            // local rotation
             importer.DefineFunction("transform_set_local_rotation",
                  new DelegateFunctionDefinition(
                      ValueType.Quaternion,
@@ -129,13 +129,44 @@ namespace UniWasm
                      GetLocalRotation
                      ));
 
+            // world rotation
+            importer.DefineFunction("transform_set_world_rotation",
+                 new DelegateFunctionDefinition(
+                     ValueType.IdAndQuaternion,
+                     ValueType.Unit,
+                     SetWorldRotation
+                     ));
+            importer.DefineFunction("transform_get_world_rotation_x",
+                 new DelegateFunctionDefinition(
+                     ValueType.ObjectId,
+                     ValueType.Float,
+                     _ => new object[] { transform.rotation.x }
+                     ));
+            importer.DefineFunction("transform_get_world_rotation_y",
+                 new DelegateFunctionDefinition(
+                     ValueType.ObjectId,
+                     ValueType.Float,
+                     _ => new object[] { transform.rotation.y }
+                     ));
+            importer.DefineFunction("transform_get_world_rotation_z",
+                 new DelegateFunctionDefinition(
+                     ValueType.ObjectId,
+                     ValueType.Float,
+                     _ => new object[] { transform.rotation.z }
+                     ));
+            importer.DefineFunction("transform_get_world_rotation_w",
+                 new DelegateFunctionDefinition(
+                     ValueType.ObjectId,
+                     ValueType.Float,
+                     _ => new object[] { transform.rotation.w }
+                     ));
+
             importer.DefineFunction("transform_set_local_scale",
                  new DelegateFunctionDefinition(
                      ValueType.Vector3,
                      ValueType.Unit,
                      SetLocalScale
                      ));
-
             /*
             importer.DefineFunction("transform_get_local_scale",
                  new DelegateFunctionDefinition(
@@ -239,6 +270,28 @@ namespace UniWasm
             transform.localRotation = new Quaternion(x, y, z, w);
             return UniWasmUtils.Unit;
         }
+        private IReadOnlyList<object> SetWorldRotation(IReadOnlyList<object> arg)
+        {
+            if (arg.Count != 5)
+            {
+                return UniWasmUtils.Unit;
+            }
+
+            var objectId = (int)arg[0];
+
+            var x = (float)arg[1];
+            var y = (float)arg[2];
+            var z = (float)arg[3];
+            var w = (float)arg[4];
+
+            if (!TryGetTransform(objectId, out var transform))
+            {
+                return UniWasmUtils.Unit;
+            }
+            transform.rotation = new Quaternion(x, y, z, w);
+            return UniWasmUtils.Unit;
+        }
+
 
 
         private IReadOnlyList<object> GetLocalScale(IReadOnlyList<object> arg)

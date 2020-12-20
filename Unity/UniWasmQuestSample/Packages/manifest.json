@@ -1,21 +1,29 @@
 {
-    "scopedRegistries": [
-        {
-            "name": "Microsoft Mixed Reality",
-            "url": "https://pkgs.dev.azure.com/aipmr/MixedReality-Unity-Packages/_packaging/Unity-packages/npm/registry/",
-            "scopes": [
-                "com.microsoft.mixedreality",
-                "com.microsoft.spatialaudio"
-            ]
-        },
-        {
-            "name": "MS Build for Unity",
-            "url": "https://pkgs.dev.azure.com/UnityDeveloperTools/MSBuildForUnity/_packaging/UnityDeveloperTools/npm/registry",
-            "scopes": [
-                "com.microsoft"
-            ]
-        }
-    ],
+  "scopedRegistries": [
+    {
+      "name": "Microsoft Mixed Reality",
+      "url": "https://pkgs.dev.azure.com/aipmr/MixedReality-Unity-Packages/_packaging/Unity-packages/npm/registry/",
+      "scopes": [
+        "com.microsoft.mixedreality",
+        "com.microsoft.spatialaudio"
+      ]
+    },
+    {
+      "name": "MS Build for Unity",
+      "url": "https://pkgs.dev.azure.com/UnityDeveloperTools/MSBuildForUnity/_packaging/UnityDeveloperTools/npm/registry",
+      "scopes": [
+        "com.microsoft"
+      ]
+    },
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.atteneder.gltfast",
+        "com.openupm"
+      ]
+    }
+  ],
   "dependencies": {
     "com.microsoft.msbuildforunity": "0.9.1-20200131.14",
     "net.tarukosu.uniwasm": "file:../../UniWasmApp/Assets/UniWasm",
@@ -60,6 +68,7 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0"
+    "com.unity.modules.xr": "1.0.0",
+    "com.atteneder.gltfast": "2.5.0"
   }
 }

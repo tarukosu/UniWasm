@@ -197,17 +197,17 @@ pub mod element {
     }
 
     impl Element {
-        pub fn get_world_position(&self) -> Vector3 {
-            transform::get_world_position(self.index)
-        }
-        pub fn set_world_position(&self, position: Vector3) {
-            transform::set_world_position(self.index, position)
-        }
         pub fn get_local_position(&self) -> Vector3 {
             transform::get_local_position(self.index)
         }
         pub fn set_local_position(&self, position: Vector3) {
             transform::set_local_position(self.index, position)
+        }
+        pub fn get_world_position(&self) -> Vector3 {
+            transform::get_world_position(self.index)
+        }
+        pub fn set_world_position(&self, position: Vector3) {
+            transform::set_world_position(self.index, position)
         }
         pub fn get_local_rotation(&self) -> Quaternion {
             transform::get_local_rotation(self.index)
@@ -215,6 +215,13 @@ pub mod element {
         pub fn set_local_rotation(&self, rotation: Quaternion) {
             transform::set_local_rotation(self.index, rotation)
         }
+        pub fn get_world_rotation(&self) -> Quaternion {
+            transform::get_world_rotation(self.index)
+        }
+        pub fn set_world_rotation(&self, rotation: Quaternion) {
+            transform::set_world_rotation(self.index, rotation)
+        }
+
         fn new(index: ElementIndex) -> Element {
             Element { index }
         }

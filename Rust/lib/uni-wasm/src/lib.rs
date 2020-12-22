@@ -1,7 +1,8 @@
 extern crate nalgebra as na;
-extern crate num_traits;
+// extern crate num_traits;
 use std::ops;
 
+// Vector3
 #[derive(Debug, Clone, Copy)]
 pub struct Vector3 {
     pub x: f32,
@@ -12,6 +13,18 @@ pub struct Vector3 {
 impl Vector3 {
     pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
         Vector3 { x, y, z }
+    }
+
+    pub fn forward() -> Vector3 {
+        Vector3::new(1.0, 0.0, 0.0)
+    }
+
+    fn na_vec(self) -> na::Vector3<f32> {
+        na::Vector3::new(self.x, self.y, self.z)
+    }
+
+    fn from_na_vec(v: na::Vector3<f32>) -> Vector3 {
+        Vector3::new(v.x, v.y, v.z)
     }
 }
 
@@ -33,6 +46,32 @@ impl ops::Mul<Vector3> for f32 {
     type Output = Vector3;
     fn mul(self, vector: Vector3) -> Self::Output {
         Vector3::new(self * vector.x, self * vector.y, self * vector.z)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Quaternion {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
+}
+
+impl Quaternion {
+    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Quaternion {
+        Quaternion { x, y, z, w }
+    }
+
+    pub fn forward(self) -> Vector3 {
+        let q = self.na_quat();
+        let v = q.transform_vector(&Vector3::forward().na_vec());
+        Vector3::from_na_vec(v)
+    }
+
+    fn na_quat(self) -> na::UnitQuaternion<f32> {
+        //na::UnitQuaternion<f32>(self.x, self.y, self.z, self.w)
+        let q = na::Quaternion::new(self.w, self.x, self.y, self.z);
+        na::UnitQuaternion::from_quaternion(q)
     }
 }
 
@@ -74,7 +113,7 @@ pub mod wasm_binding {
 
 pub mod common {
     pub use crate::wasm_binding;
-    pub use crate::Vector3;
+    pub use crate::{Quaternion, Vector3};
 
     pub type ElementIndex = i32;
     pub type ResourceIndex = i32;
@@ -87,6 +126,15 @@ pub mod common {
             x: vector.x,
             y: vector.y,
             z: vector.z,
+        }
+    }
+
+    pub fn quaternion_to_wasm_quaternion(rotation: Quaternion) -> wasm_binding::Quaternion {
+        wasm_binding::Quaternion {
+            x: rotation.x,
+            y: rotation.y,
+            z: rotation.z,
+            w: rotation.w,
         }
     }
     /*
@@ -106,6 +154,8 @@ pub mod common {
     }
     */
 
+    /*
+
     #[repr(C)]
     pub struct Quaternion {
         pub x: f32,
@@ -113,15 +163,16 @@ pub mod common {
         pub z: f32,
         pub w: f32,
     }
+    */
 }
 
 pub mod transform {
     pub use crate::common::ElementIndex;
-    pub use crate::common::Quaternion;
-    pub use crate::common::Vector3;
+    // pub use crate::common::Quaternion;
+    // pub use crate::common::Vector3;
 
-    pub use crate::common::vector3_to_wasm_vector3;
-    pub use crate::wasm_binding;
+    pub use crate::common::{quaternion_to_wasm_quaternion, vector3_to_wasm_vector3};
+    pub use crate::{wasm_binding, Quaternion, Vector3};
 
     pub struct Transform {
         index: ElementIndex,
@@ -160,6 +211,11 @@ pub mod transform {
         pub fn myself() -> Transform {
             Transform::new(0)
         }
+
+        pub fn forward(self) -> Vector3 {
+            let q = self.get_world_rotation();
+            q.forward()
+        }
     }
 
     pub fn get_local_position(object_id: ElementIndex) -> Vector3 {
@@ -191,6 +247,7 @@ pub mod transform {
 
     pub fn set_world_position(object_id: ElementIndex, position: Vector3) {
         unsafe {
+            let position = vector3_to_wasm_vector3(position);
             transform_set_world_position(object_id, position);
         }
     }
@@ -216,6 +273,7 @@ pub mod transform {
     }
     pub fn set_local_rotation(object_id: ElementIndex, rotation: Quaternion) {
         unsafe {
+            let rotation = quaternion_to_wasm_quaternion(rotation);
             transform_set_local_rotation(object_id, rotation);
         }
     }
@@ -232,6 +290,7 @@ pub mod transform {
 
     pub fn set_world_rotation(object_id: ElementIndex, rotation: Quaternion) {
         unsafe {
+            let rotation = quaternion_to_wasm_quaternion(rotation);
             transform_set_world_rotation(object_id, rotation);
         }
     }
@@ -247,6 +306,7 @@ pub mod transform {
     }
     pub fn set_local_scale(object_id: ElementIndex, scale: Vector3) {
         unsafe {
+            let scale = vector3_to_wasm_vector3(scale);
             transform_set_local_scale(object_id, scale);
         }
     }
@@ -261,6 +321,7 @@ pub mod transform {
     }
     pub fn set_world_scale(object_id: ElementIndex, scale: Vector3) {
         unsafe {
+            let scale = vector3_to_wasm_vector3(scale);
             transform_set_world_scale(object_id, scale);
         }
     }
@@ -274,7 +335,7 @@ pub mod transform {
         fn transform_get_world_position_x(object_id: ElementIndex) -> f32;
         fn transform_get_world_position_y(object_id: ElementIndex) -> f32;
         fn transform_get_world_position_z(object_id: ElementIndex) -> f32;
-        fn transform_set_world_position(object_id: ElementIndex, position: Vector3);
+        fn transform_set_world_position(object_id: ElementIndex, position: wasm_binding::Vector3);
 
         fn transform_get_world_forward_x(object_id: ElementIndex) -> f32;
         fn transform_get_world_forward_y(object_id: ElementIndex) -> f32;
@@ -284,30 +345,36 @@ pub mod transform {
         fn transform_get_local_rotation_y(object_id: ElementIndex) -> f32;
         fn transform_get_local_rotation_z(object_id: ElementIndex) -> f32;
         fn transform_get_local_rotation_w(object_id: ElementIndex) -> f32;
-        fn transform_set_local_rotation(object_id: ElementIndex, rotation: Quaternion);
+        fn transform_set_local_rotation(
+            object_id: ElementIndex,
+            rotation: wasm_binding::Quaternion,
+        );
 
         fn transform_get_world_rotation_x(object_id: ElementIndex) -> f32;
         fn transform_get_world_rotation_y(object_id: ElementIndex) -> f32;
         fn transform_get_world_rotation_z(object_id: ElementIndex) -> f32;
         fn transform_get_world_rotation_w(object_id: ElementIndex) -> f32;
-        fn transform_set_world_rotation(object_id: ElementIndex, rotation: Quaternion);
+        fn transform_set_world_rotation(
+            object_id: ElementIndex,
+            rotation: wasm_binding::Quaternion,
+        );
 
         fn transform_get_local_scale_x(object_id: ElementIndex) -> f32;
         fn transform_get_local_scale_y(object_id: ElementIndex) -> f32;
         fn transform_get_local_scale_z(object_id: ElementIndex) -> f32;
-        fn transform_set_local_scale(object_id: ElementIndex, scale: Vector3);
+        fn transform_set_local_scale(object_id: ElementIndex, scale: wasm_binding::Vector3);
 
         fn transform_get_world_scale_x(object_id: ElementIndex) -> f32;
         fn transform_get_world_scale_y(object_id: ElementIndex) -> f32;
         fn transform_get_world_scale_z(object_id: ElementIndex) -> f32;
-        fn transform_set_world_scale(object_id: ElementIndex, scale: Vector3);
+        fn transform_set_world_scale(object_id: ElementIndex, scale: wasm_binding::Vector3);
     }
 }
 
 pub mod element {
     pub use crate::common::ElementIndex;
     pub use crate::common::{ResourceIndex, Vector3};
-    pub use crate::transform;
+    pub use crate::{physics::Physics, transform};
     use transform::{Quaternion, Transform};
 
     pub struct Element {
@@ -353,6 +420,10 @@ pub mod element {
         pub fn transform(&self) -> Transform {
             Transform::new(self.index)
         }
+
+        pub fn physics(&self) -> Physics {
+            Physics::new(self.index)
+        }
     }
 
     pub fn spawn_object_by_id(resource_id: &str) -> Result<Element, &str> {
@@ -390,9 +461,31 @@ pub mod element {
 }
 
 pub mod physics {
-    pub use crate::common::ElementIndex;
-    pub use crate::common::Quaternion;
-    pub use crate::common::Vector3;
+    pub use crate::{
+        common::{vector3_to_wasm_vector3, ElementIndex},
+        wasm_binding, Vector3,
+    };
+
+    pub struct Physics {
+        index: ElementIndex,
+    }
+
+    impl Physics {
+        pub(crate) fn new(index: ElementIndex) -> Physics {
+            Physics { index }
+        }
+
+        pub fn myself() -> Physics {
+            Physics::new(0)
+        }
+
+        pub fn set_world_velocity(self, velocity: Vector3) {
+            set_world_velocity(self.index, velocity)
+        }
+    }
+
+    //pub use crate::common::Quaternion;
+    //pub use crate::common::Vector3;
 
     /*
     pub fn set_local_velocity(object_id: ElementIndex, velocity: Vector3)
@@ -406,12 +499,13 @@ pub mod physics {
 
     pub fn set_world_velocity(object_id: ElementIndex, velocity: Vector3) {
         unsafe {
+            let velocity = vector3_to_wasm_vector3(velocity);
             return physics_set_world_velocity(object_id, velocity);
         }
     }
 
     extern "C" {
         // fn physics_set_local_velocity(object_id: ElementIndex, velocity: Vector3);
-        fn physics_set_world_velocity(object_id: ElementIndex, velocity: Vector3);
+        fn physics_set_world_velocity(object_id: ElementIndex, velocity: wasm_binding::Vector3);
     }
 }

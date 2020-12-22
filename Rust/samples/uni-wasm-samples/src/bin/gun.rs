@@ -1,6 +1,8 @@
-use uni_wasm::transform;
+use element::Element;
+use transform::Transform;
 use uni_wasm::element;
 use uni_wasm::physics;
+use uni_wasm::{Vector3, transform};
 
 fn main() {
     let bullet_index = element::get_resource_index_by_id("123");
@@ -25,19 +27,37 @@ unsafe fn on_use() {
     if result.is_err() {
         return;
     }
-    let element_id = result.unwrap();
+    let bullet_element = result.unwrap();
+    let element = Element::myself();
+    let transform = Transform::myself();
 
-    let gun_position = transform::get_world_position(0);
-    let forward = transform::get_world_forward(element_id);
+    // let gun_position = transform::get_world_position(0);
+    let gun_position = transform.get_world_position();
+    // let forward = transform::get_world_forward(element_id);
 
     let offset = 0.5;
+
+    let position = Vector3::new(0.0, 0.0, 0.0);
+
+    let position = gun_position + offset * gun_position;
+    /*
+        x: gun_position.x + offset * forward.x,
+        y: gun_position.y + offset * forward.y,
+        z: gun_position.z + offset * forward.z,
+    };
+    */
+    /*
     let position = transform::Vector3 {
         x: gun_position.x + offset * forward.x,
         y: gun_position.y + offset * forward.y,
         z: gun_position.z + offset * forward.z,
     };
+    */
 
-    transform::set_world_position(element_id, position);
+    /*
+
+    bullet_element.set_world_position(position);
+    // transform::set_world_position(element_id, position);
 
     let rotation = transform::get_world_rotation(0);
     transform::set_world_rotation(element_id, rotation);
@@ -51,4 +71,5 @@ unsafe fn on_use() {
     };
 
     physics::set_world_velocity(element_id, velocity);
+    */
 }

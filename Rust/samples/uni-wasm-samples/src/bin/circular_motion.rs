@@ -1,8 +1,7 @@
-use uni_wasm::transform;
 use uni_wasm::time;
+use uni_wasm::transform;
 
-fn main() {
-}
+fn main() {}
 
 #[no_mangle]
 fn update() {
@@ -13,10 +12,6 @@ fn update() {
     let x = theta.cos();
     let y = theta.sin();
 
-    let position = transform::Vector3 {
-        x: x,
-        y: y,
-        z: 0.0,
-    };
+    let position = transform::Vector3::new(x, y, 0.0);
     transform::set_local_position(0, position);
 }

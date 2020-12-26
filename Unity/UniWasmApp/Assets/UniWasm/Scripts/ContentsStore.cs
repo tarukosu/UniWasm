@@ -10,39 +10,48 @@ namespace UniWasm
         public GameObject GameObject { get; internal set; }
     }
 
+    public class Element
+    {
+        public string Id { set; get; }
+        public GameObject GameObject { get; internal set; }
+    }
+
+
     public class ContentsStore
     {
-        private int idCounter = 1;
+        // private int elementIndexCounter = 1;
 
-        public readonly Dictionary<string, GameObject> Objects = new Dictionary<string, GameObject>();
+        // public readonly Dictionary<string, GameObject> Objects = new Dictionary<string, GameObject>();
+        public readonly List<Element> Elements = new List<Element>();
 
         public readonly List<Resource> Resources = new List<Resource>();
 
         public Transform RootTransform;
 
-        public ContentsStore()
+        public int RegisterElement(Element element)
         {
-            // Resource index 0 is empty
-            var emptyResource = new Resource()
-            {
-                Id = "",
-                GameObject = null
-            };
-            Resources.Add(emptyResource);
-        }
+            Elements.Add(element);
+            // var id = elementIndexCounter;
+            // elementIndexCounter += 1;
 
-        public int RegisterObject(GameObject gameObject)
-        {
-            var id = idCounter;
-            idCounter += 1;
-
-            Objects.Add(id.ToString(), gameObject);
-            return id;
+            // Objects.Add(id.ToString(), gameObject);
+            return Elements.Count;
         }
 
         public void RegisterResource(Resource resource)
         {
             Resources.Add(resource);
+        }
+
+        public bool TryGetElementByElementIndex(int elementIndex, out Element element)
+        {
+            if (elementIndex <= 0 || elementIndex > Elements.Count)
+            {
+                element = null;
+                return false;
+            }
+            element = Elements[elementIndex - 1];
+            return true;
         }
 
         public bool TryGetResourceIndexById(string id, out int resourceIndex)

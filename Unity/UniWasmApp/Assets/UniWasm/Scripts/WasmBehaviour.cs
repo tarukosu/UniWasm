@@ -67,16 +67,20 @@ namespace UniWasm
                          ));
             }
 
-            var gameObjectBinding = new GameObjectBinding(transform, store);
+            var element = new Element()
+            {
+                GameObject = gameObject
+            };
+            var gameObjectBinding = new GameObjectBinding(element, store);
             importer.IncludeDefinitions(gameObjectBinding.Importer);
 
-            var transformBinding = new TransformBinding(transform, store);
+            var transformBinding = new TransformBinding(element, store);
             importer.IncludeDefinitions(transformBinding.Importer);
 
-            var physicsBinding = new PhysicsBinding(transform, store);
+            var physicsBinding = new PhysicsBinding(element, store);
             importer.IncludeDefinitions(physicsBinding.Importer);
 
-            var timeBinding = new TimeBinding();
+            var timeBinding = new TimeBinding(element, store);
             importer.IncludeDefinitions(timeBinding.Importer);
 
             module = ModuleInstance.Instantiate(file, importer);

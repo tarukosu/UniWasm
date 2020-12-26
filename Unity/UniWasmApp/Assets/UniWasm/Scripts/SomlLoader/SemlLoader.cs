@@ -46,6 +46,10 @@ namespace UniWasm
         private void LoadResource(XmlNode resourceNode)
         {
             Debug.Log("LoadResource");
+            if (resourceNode == null)
+            {
+                return;
+            }
             foreach (XmlNode node in resourceNode.ChildNodes)
             {
                 var t = InstantiateNode(path, node, resourceRoot);

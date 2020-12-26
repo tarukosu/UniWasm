@@ -12,14 +12,82 @@ namespace UniWasm
         public ModuleInstance ModuleInstance { set; get; }
         public PredefinedImporter Importer { private set; get; }
 
-        public BindingBase()
+        protected Element thisElement;
+        protected ContentsStore store;
+
+        public BindingBase(Element element, ContentsStore store)
         {
             Importer = GenerateImporter();
+            this.thisElement = element;
+            this.store = store;
         }
 
         public abstract PredefinedImporter GenerateImporter();
+
+        protected bool TryGetElementWithArg(ArgumentParser parser, ContentsStore store, out Element element)
+        {
+            if (!parser.TryReadInt(out var elementIndex))
+            {
+                element = null;
+                return false;
+            }
+
+            if (elementIndex == 0)
+            {
+                element = thisElement;
+                return true;
+            }
+
+            if (!store.TryGetElementByElementIndex(elementIndex, out element))
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 
+    internal enum Vector3ElementType
+    {
+        x,
+        y,
+        z
+    }
+
+    internal static class Vector3Extension
+    {
+        public static float GetSpecificValue(this Vector3 vector3, Vector3ElementType element)
+        {
+            switch (element)
+            {
+                case Vector3ElementType.x:
+                    return vector3.x;
+                case Vector3ElementType.y:
+                    return vector3.y;
+                case Vector3ElementType.z:
+                    return vector3.z;
+                default:
+                    return float.NaN;
+            }
+        }
+    }
+
+    /*
+    private float GetValueForSpecificAxis(Vector3 vector3, Vector3AxisType axis)
+    {
+        switch (axis)
+        {
+            case Vector3AxisType.x:
+                return vector3.x;
+            case Vector3AxisType.y:
+                return vector3.y;
+            case Vector3AxisType.z:
+                return vector3.z;
+            default:
+                return float.NaN;
+        }
+    }
+    */
     public class ArgumentParser
     {
         private IReadOnlyList<object> arg;
@@ -82,6 +150,26 @@ namespace UniWasm
             }
         }
 
+        public bool TryReadFloat(out float value)
+        {
+            if (!TryReadObject(out var valueObject))
+            {
+                value = 0;
+                return false;
+            }
+
+            try
+            {
+                value = (float)valueObject;
+                return true;
+            }
+            catch (Exception e)
+            {
+                value = 0;
+                Debug.LogWarning(e);
+                return false;
+            }
+        }
 
         public bool TryReadString(out string value)
         {
@@ -110,6 +198,20 @@ namespace UniWasm
                 value = "";
                 return false;
             }
+        }
+
+        public bool TryReadVector3(out Vector3 vector)
+        {
+            if (TryReadFloat(out var x) &&
+                TryReadFloat(out var y) &&
+                TryReadFloat(out var z))
+            {
+                vector = new Vector3(x, y, z);
+                return true;
+            }
+
+            vector = Vector3.zero;
+            return false;
         }
 
         private bool TryReadObject(out object value)

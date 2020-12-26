@@ -7,13 +7,8 @@ namespace UniWasm
 {
     public class GameObjectBinding : BindingBase
     {
-        private Transform transform;
-        private ContentsStore store;
-
-        public GameObjectBinding(Transform transform, ContentsStore store) : base()
+        public GameObjectBinding(Element element, ContentsStore store) : base(element, store)
         {
-            this.transform = transform;
-            this.store = store;
         }
 
         public override PredefinedImporter GenerateImporter()
@@ -80,7 +75,12 @@ namespace UniWasm
             var root = store.RootTransform;
             var go = Object.Instantiate(resource.GameObject);
             go.transform.SetParent(root, false);
-            var elementIndex = store.RegisterObject(go);
+
+            var element = new Element()
+            {
+                GameObject = go
+            };
+            var elementIndex = store.RegisterElement(element);
             go.name = $"{resource.Id}, {elementIndex}";
             Debug.Log($"Spawn Object, ElementIndex: {elementIndex}");
             return ReturnValue.FromObject(elementIndex);

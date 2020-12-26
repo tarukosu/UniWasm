@@ -214,6 +214,21 @@ namespace UniWasm
             return false;
         }
 
+        public bool TryReadQuaternion(out Quaternion quaternion)
+        {
+            if (TryReadFloat(out var x) &&
+                TryReadFloat(out var y) &&
+                TryReadFloat(out var z) &&
+                TryReadFloat(out var w))
+            {
+                quaternion = new Quaternion(x, y, z, w);
+                return true;
+            }
+
+            quaternion = Quaternion.identity;
+            return false;
+        }
+
         private bool TryReadObject(out object value)
         {
             if (arg.Count <= index)

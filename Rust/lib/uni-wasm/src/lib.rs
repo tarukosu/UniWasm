@@ -1,5 +1,5 @@
 extern crate nalgebra as na;
-// extern crate num_traits;
+
 use std::ops;
 
 // Vector3
@@ -69,9 +69,31 @@ impl Quaternion {
     }
 
     fn na_quat(self) -> na::UnitQuaternion<f32> {
-        //na::UnitQuaternion<f32>(self.x, self.y, self.z, self.w)
         let q = na::Quaternion::new(self.w, self.x, self.y, self.z);
         na::UnitQuaternion::from_quaternion(q)
+    }
+}
+
+mod utils {
+    pub fn str_to_ptr(text: &str) -> (usize, usize) {
+        let ptr = text.as_ptr() as usize;
+        let len = text.len();
+        return (ptr, len);
+    }
+}
+
+pub mod debug {
+    use crate::utils::str_to_ptr;
+
+    pub fn log_info(message: &str) {
+        unsafe {
+            let (ptr, len) = str_to_ptr(message);
+            debug_log_info(ptr, len);
+        }
+    }
+
+    extern "C" {
+        fn debug_log_info(ptr: usize, len: usize);
     }
 }
 
@@ -118,9 +140,6 @@ pub mod common {
     pub type ElementIndex = i32;
     pub type ResourceIndex = i32;
 
-    // pub type Vector3 = na::Vector3<f32>;
-    //pub struct Vector3(na::Vector3<f32>);
-
     pub fn vector3_to_wasm_vector3(vector: Vector3) -> wasm_binding::Vector3 {
         wasm_binding::Vector3 {
             x: vector.x,
@@ -137,39 +156,10 @@ pub mod common {
             w: rotation.w,
         }
     }
-    /*
-    impl Vector3 {
-        pub(crate) fn to_wasm_binding(&self) -> wasm_binding::Vector3
-        {
-            wasm_binding::Vector3{ x:0.0, y:0.0, z:0.0}
-        }
-    }
-    */
-    /*
-    #[repr(C)]
-    pub struct Vector3 {
-        pub x: f32,
-        pub y: f32,
-        pub z: f32,
-    }
-    */
-
-    /*
-
-    #[repr(C)]
-    pub struct Quaternion {
-        pub x: f32,
-        pub y: f32,
-        pub z: f32,
-        pub w: f32,
-    }
-    */
 }
 
 pub mod transform {
     pub use crate::common::ElementIndex;
-    // pub use crate::common::Quaternion;
-    // pub use crate::common::Vector3;
 
     pub use crate::common::{quaternion_to_wasm_quaternion, vector3_to_wasm_vector3};
     pub use crate::{wasm_binding, Quaternion, Vector3};
@@ -224,7 +214,6 @@ pub mod transform {
             let y = transform_get_local_position_y(object_id);
             let z = transform_get_local_position_z(object_id);
             Vector3::new(x, y, z)
-            //Vector3 { x, y, z }
         }
     }
 
@@ -241,7 +230,6 @@ pub mod transform {
             let y = transform_get_world_position_y(object_id);
             let z = transform_get_world_position_z(object_id);
             Vector3::new(x, y, z)
-            //Vector3 { x, y, z }
         }
     }
 
@@ -258,7 +246,6 @@ pub mod transform {
             let y = transform_get_world_forward_y(object_id);
             let z = transform_get_world_forward_z(object_id);
             Vector3::new(x, y, z)
-            //Vector3 { x, y, z }
         }
     }
 
@@ -301,7 +288,6 @@ pub mod transform {
             let y = transform_get_local_scale_y(object_id);
             let z = transform_get_local_scale_z(object_id);
             Vector3::new(x, y, z)
-            //Vector3 { x, y, z }
         }
     }
     pub fn set_local_scale(object_id: ElementIndex, scale: Vector3) {
@@ -316,7 +302,6 @@ pub mod transform {
             let y = transform_get_world_scale_y(object_id);
             let z = transform_get_world_scale_z(object_id);
             Vector3::new(x, y, z)
-            //Vector3 { x, y, z }
         }
     }
     pub fn set_world_scale(object_id: ElementIndex, scale: Vector3) {

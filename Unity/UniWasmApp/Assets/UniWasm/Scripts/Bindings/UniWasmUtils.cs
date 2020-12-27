@@ -33,6 +33,11 @@ namespace UniWasm
             WasmValueType.Int32,
         };
 
+        public static IReadOnlyList<WasmValueType> Short = new WasmValueType[]
+        {
+            WasmValueType.Int32,
+        };
+
         public static IReadOnlyList<WasmValueType> Int = new WasmValueType[]
         {
             WasmValueType.Int32,
@@ -76,6 +81,17 @@ namespace UniWasm
         };
 
         public static IReadOnlyList<WasmValueType> String = new WasmValueType[]
+        {
+            WasmValueType.Int32,
+            WasmValueType.Int32,
+        };
+
+        public static IReadOnlyList<WasmValueType> Pointer = new WasmValueType[]
+        {
+            WasmValueType.Int32,
+        };
+
+        public static IReadOnlyList<WasmValueType> PointerAndPointer = new WasmValueType[]
         {
             WasmValueType.Int32,
             WasmValueType.Int32,

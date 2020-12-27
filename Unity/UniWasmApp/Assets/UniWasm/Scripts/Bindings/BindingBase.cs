@@ -129,6 +129,28 @@ namespace UniWasm
             }
         }
 
+        public bool TryReadUInt(out uint value)
+        {
+            if (!TryReadObject(out var valueObject))
+            {
+                value = 0;
+                return false;
+            }
+
+            try
+            {
+                var intValue = (int)valueObject;
+                value = InterpretAsUint(intValue);
+                return true;
+            }
+            catch (Exception e)
+            {
+                value = 0;
+                Debug.LogWarning(e);
+                return false;
+            }
+        }
+
         public bool TryReadLong(out long value)
         {
             if (!TryReadObject(out var valueObject))
@@ -227,6 +249,32 @@ namespace UniWasm
 
             quaternion = Quaternion.identity;
             return false;
+        }
+
+        public static uint InterpretAsUint(int value)
+        {
+            try
+            {
+                var bytes = BitConverter.GetBytes(value);
+                return BitConverter.ToUInt32(bytes, 0);
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
+
+        public static int InterpretAsInt(uint value)
+        {
+            try
+            {
+                var bytes = BitConverter.GetBytes(value);
+                return BitConverter.ToInt32(bytes, 0);
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
         }
 
         private bool TryReadObject(out object value)

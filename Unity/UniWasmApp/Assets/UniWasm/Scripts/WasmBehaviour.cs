@@ -71,6 +71,10 @@ namespace UniWasm
             {
                 GameObject = gameObject
             };
+
+            var argsBinding = new ArgsBinding(element, store);
+            importer.IncludeDefinitions(argsBinding.Importer);
+
             var debugBinding = new DebugBinding(element, store);
             importer.IncludeDefinitions(debugBinding.Importer);
 
@@ -88,6 +92,7 @@ namespace UniWasm
 
             module = ModuleInstance.Instantiate(file, importer);
 
+            argsBinding.ModuleInstance = module;
             gameObjectBinding.ModuleInstance = module;
             debugBinding.ModuleInstance = module;
 

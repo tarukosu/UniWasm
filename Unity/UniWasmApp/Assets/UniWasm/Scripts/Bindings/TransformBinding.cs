@@ -248,20 +248,6 @@ namespace UniWasm
             return SetQuaternion(arg, (t, q) => t.rotation = q);
         }
 
-        private IReadOnlyList<object> GetLocalScale(IReadOnlyList<object> arg)
-        {
-            return UniWasmUtils.Unit;
-
-            /*
-            var scale = transform.localScale;
-
-            return new object[]
-            {
-                scale.x, scale.y, scale.z
-            };
-            */
-        }
-
         private IReadOnlyList<object> SetLocalScale(IReadOnlyList<object> arg)
         {
             return SetVector3(arg, (t, v) => t.localScale = v);

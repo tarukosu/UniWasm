@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Wasm.Interpret;
@@ -7,18 +8,25 @@ namespace UniWasm
 {
     public class TransformBinding : BindingBase
     {
-        private Transform transform;
-        private ContentsStore store;
-
-        public TransformBinding(Transform transform, ContentsStore store) : base()
+        public TransformBinding(Element element, ContentsStore store) : base(element, store)
         {
-            this.transform = transform;
-            this.store = store;
         }
 
         public override PredefinedImporter GenerateImporter()
         {
             var importer = new PredefinedImporter();
+
+            // Local position
+            foreach (Vector3ElementType axis in Enum.GetValues(typeof(Vector3ElementType)))
+            {
+                importer.DefineFunction($"transform_get_local_position_{axis}",
+                     new DelegateFunctionDefinition(
+                         ValueType.ObjectId,
+                         ValueType.Float,
+                         arg => GetTransformValue(arg, t => t.localPosition.GetSpecificValue(axis))
+                         ));
+            }
+
             importer.DefineFunction("transform_set_local_position",
                  new DelegateFunctionDefinition(
                      ValueType.IdAndVector3,
@@ -26,83 +34,61 @@ namespace UniWasm
                      SetLocalPosition
                      ));
 
+            // World position
+            foreach (Vector3ElementType axis in Enum.GetValues(typeof(Vector3ElementType)))
+            {
+                importer.DefineFunction($"transform_get_world_position_{axis}",
+                     new DelegateFunctionDefinition(
+                         ValueType.ObjectId,
+                         ValueType.Float,
+                         arg => GetTransformValue(arg, t => t.position.GetSpecificValue(axis))
+                         ));
+            }
+
             importer.DefineFunction("transform_set_world_position",
                  new DelegateFunctionDefinition(
                      ValueType.IdAndVector3,
                      ValueType.Unit,
                      SetWorldPosition
                      ));
-            /*
-            importer.DefineFunction("transform_get_local_position",
+
+            // Local scale
+            foreach (Vector3ElementType axis in Enum.GetValues(typeof(Vector3ElementType)))
+            {
+                importer.DefineFunction($"transform_get_local_scale_{axis}",
+                     new DelegateFunctionDefinition(
+                         ValueType.ObjectId,
+                         ValueType.Float,
+                         arg => GetTransformValue(arg, t => t.localScale.GetSpecificValue(axis))
+                         ));
+            }
+
+            importer.DefineFunction("transform_set_local_scale",
                  new DelegateFunctionDefinition(
+                     ValueType.IdAndVector3,
                      ValueType.Unit,
-                     ValueType.Vector3,
-                     GetLocalPosition
-                     ));
-            */
-
-            // get local position
-            importer.DefineFunction("transform_get_local_position_x",
-                 new DelegateFunctionDefinition(
-                     ValueType.ObjectId,
-                     ValueType.Float,
-                     _ => new object[] { transform.localPosition.x }
+                     SetLocalScale
                      ));
 
-            importer.DefineFunction("transform_get_local_position_y",
+            // World scale
+            foreach (Vector3ElementType axis in Enum.GetValues(typeof(Vector3ElementType)))
+            {
+                importer.DefineFunction($"transform_get_world_scale_{axis}",
+                     new DelegateFunctionDefinition(
+                         ValueType.ObjectId,
+                         ValueType.Float,
+                         arg => GetTransformValue(arg, t => t.lossyScale.GetSpecificValue(axis))
+                         ));
+            }
+
+            importer.DefineFunction("transform_set_world_scale",
                  new DelegateFunctionDefinition(
-                     ValueType.ObjectId,
-                     ValueType.Float,
-                     _ => new object[] { transform.localPosition.y }
-                     ));
-            importer.DefineFunction("transform_get_local_position_z",
-                 new DelegateFunctionDefinition(
-                     ValueType.ObjectId,
-                     ValueType.Float,
-                     _ => new object[] { transform.localPosition.z }
+                     ValueType.IdAndVector3,
+                     ValueType.Unit,
+                     SetWorldScale
                      ));
 
-            importer.DefineFunction("transform_get_world_position_x",
-                 new DelegateFunctionDefinition(
-                     ValueType.ObjectId,
-                     ValueType.Float,
-                     _ => new object[] { transform.position.x }
-                     ));
-
-            importer.DefineFunction("transform_get_world_position_y",
-                 new DelegateFunctionDefinition(
-                     ValueType.ObjectId,
-                     ValueType.Float,
-                     _ => new object[] { transform.position.y }
-                     ));
-            importer.DefineFunction("transform_get_world_position_z",
-                 new DelegateFunctionDefinition(
-                     ValueType.ObjectId,
-                     ValueType.Float,
-                     _ => new object[] { transform.position.z }
-                     ));
-
-            // temporary function 
-            importer.DefineFunction("transform_get_world_forward_x",
-                 new DelegateFunctionDefinition(
-                     ValueType.ObjectId,
-                     ValueType.Float,
-                     _ => new object[] { transform.forward.x }
-                     ));
-            importer.DefineFunction("transform_get_world_forward_y",
-                 new DelegateFunctionDefinition(
-                     ValueType.ObjectId,
-                     ValueType.Float,
-                     _ => new object[] { transform.forward.y }
-                     ));
-            importer.DefineFunction("transform_get_world_forward_z",
-                 new DelegateFunctionDefinition(
-                     ValueType.ObjectId,
-                     ValueType.Float,
-                     _ => new object[] { transform.forward.z }
-                     ));
-            // temporary function end
-
+            /*
             importer.DefineFunction("transform_get_local_position_y",
                  new DelegateFunctionDefinition(
                      ValueType.ObjectId,
@@ -167,15 +153,9 @@ namespace UniWasm
                      ValueType.Unit,
                      SetLocalScale
                      ));
-            /*
-            importer.DefineFunction("transform_get_local_scale",
-                 new DelegateFunctionDefinition(
-                     ValueType.Unit,
-                     ValueType.Vector3,
-                     GetLocalScale
-                     ));
             */
 
+            /*
             importer.DefineFunction("transform_get_local_scale_x",
                  new DelegateFunctionDefinition(
                      ValueType.ObjectId,
@@ -194,141 +174,109 @@ namespace UniWasm
                      ValueType.Float,
                      _ => new object[] { transform.localScale.z }
                      ));
+            */
             return importer;
         }
 
-        private IReadOnlyList<object> GetLocalRotation(IReadOnlyList<object> arg)
+        private IReadOnlyList<object> InvalidFloatValue
         {
-            var rotation = transform.localRotation;
-            return new object[]
-            {
-                rotation.x, rotation.y, rotation.z, rotation.w
-            };
+            get => ReturnValue.FromObject(float.NaN);
         }
 
-        private IReadOnlyList<object> GetLocalPosition(IReadOnlyList<object> arg)
+        private IReadOnlyList<object> GetTransformValue(IReadOnlyList<object> arg, Func<Transform, float> func)
         {
-            var position = transform.localPosition;
-            return new object[]
+            var parser = new ArgumentParser(arg);
+
+            if (!TryGetElementWithArg(parser, store, out var element))
             {
-                position.x, position.y, position.z
-            };
+                return InvalidFloatValue;
+            }
+            var value = func.Invoke(element.GameObject.transform);
+            return ReturnValue.FromObject(value);
         }
+
+        private IReadOnlyList<object> SetVector3(IReadOnlyList<object> arg, Action<Transform, Vector3> action)
+        {
+            var parser = new ArgumentParser(arg);
+            if (!TryGetElementWithArg(parser, store, out var element))
+            {
+                return ReturnValue.Unit;
+            }
+
+            if (!parser.TryReadVector3(out var position))
+            {
+                return ReturnValue.Unit;
+            }
+            action?.Invoke(element.GameObject.transform, position);
+            return ReturnValue.Unit;
+        }
+
+        private IReadOnlyList<object> SetQuaternion(IReadOnlyList<object> arg, Action<Transform, Quaternion> action)
+        {
+            var parser = new ArgumentParser(arg);
+            if (!TryGetElementWithArg(parser, store, out var element))
+            {
+                return ReturnValue.Unit;
+            }
+
+            if (!parser.TryReadQuaternion(out var quaternion))
+            {
+                return ReturnValue.Unit;
+            }
+            action?.Invoke(element.GameObject.transform, quaternion);
+            return ReturnValue.Unit;
+        }
+
 
         private IReadOnlyList<object> SetLocalPosition(IReadOnlyList<object> arg)
         {
-            if (arg.Count != 4)
-            {
-                return UniWasmUtils.Unit;
-            }
-            var objectId = (int)arg[0];
-
-            var x = (float)arg[1];
-            var y = (float)arg[2];
-            var z = (float)arg[3];
-
-            if (!TryGetTransform(objectId, out var transform))
-            {
-                return UniWasmUtils.Unit;
-            }
-
-            transform.localPosition = new Vector3(x, y, z);
-            return UniWasmUtils.Unit;
+            return SetVector3(arg, (t, v) => t.localPosition = v);
         }
+
         private IReadOnlyList<object> SetWorldPosition(IReadOnlyList<object> arg)
         {
-            if (arg.Count != 4)
-            {
-                return UniWasmUtils.Unit;
-            }
-            var objectId = (int)arg[0];
-
-            var x = (float)arg[1];
-            var y = (float)arg[2];
-            var z = (float)arg[3];
-
-            if (!TryGetTransform(objectId, out var transform))
-            {
-                return UniWasmUtils.Unit;
-            }
-
-            transform.position = new Vector3(x, y, z);
-            return UniWasmUtils.Unit;
+            return SetVector3(arg, (t, v) => t.position = v);
         }
 
         private IReadOnlyList<object> SetLocalRotation(IReadOnlyList<object> arg)
         {
-            if (arg.Count != 4)
-            {
-                return UniWasmUtils.Unit;
-            }
-            var x = (float)arg[0];
-            var y = (float)arg[1];
-            var z = (float)arg[2];
-            var w = (float)arg[3];
-
-            transform.localRotation = new Quaternion(x, y, z, w);
-            return UniWasmUtils.Unit;
+            return SetQuaternion(arg, (t, q) => t.localRotation = q);
         }
+
         private IReadOnlyList<object> SetWorldRotation(IReadOnlyList<object> arg)
         {
-            if (arg.Count != 5)
-            {
-                return UniWasmUtils.Unit;
-            }
-
-            var objectId = (int)arg[0];
-
-            var x = (float)arg[1];
-            var y = (float)arg[2];
-            var z = (float)arg[3];
-            var w = (float)arg[4];
-
-            if (!TryGetTransform(objectId, out var transform))
-            {
-                return UniWasmUtils.Unit;
-            }
-            transform.rotation = new Quaternion(x, y, z, w);
-            return UniWasmUtils.Unit;
-        }
-
-
-
-        private IReadOnlyList<object> GetLocalScale(IReadOnlyList<object> arg)
-        {
-            var scale = transform.localScale;
-
-            return new object[]
-            {
-                scale.x, scale.y, scale.z
-            };
+            return SetQuaternion(arg, (t, q) => t.rotation = q);
         }
 
         private IReadOnlyList<object> SetLocalScale(IReadOnlyList<object> arg)
         {
-            if (arg.Count != 3)
-            {
-                return UniWasmUtils.Unit;
-            }
-            var x = (float)arg[0];
-            var y = (float)arg[1];
-            var z = (float)arg[2];
-
-            transform.localScale = new Vector3(x, y, z);
-            return UniWasmUtils.Unit;
+            return SetVector3(arg, (t, v) => t.localScale = v);
         }
 
-        private bool TryGetTransform(int objectId, out Transform transform)
-        {
-            var key = objectId.ToString();
-            if (!store.Objects.TryGetValue(key, out var gameObject))
-            {
-                transform = default;
-                return false;
-            }
 
-            transform = gameObject.transform;
-            return true;
+        private void SetWorldScale(Transform transform, Vector3 scale)
+        {
+            transform.localScale = Vector3.one;
+            var lossyScale = transform.lossyScale;
+
+            Vector3 localScale;
+            try
+            {
+                var x = scale.x / lossyScale.x;
+                var y = scale.y / lossyScale.y;
+                var z = scale.z / lossyScale.z;
+                localScale = new Vector3(x, y, z);
+            }
+            catch (Exception)
+            {
+                localScale = scale;
+            }
+            transform.localScale = localScale;
+        }
+
+        private IReadOnlyList<object> SetWorldScale(IReadOnlyList<object> arg)
+        {
+            return SetVector3(arg, SetWorldScale);
         }
     }
 }

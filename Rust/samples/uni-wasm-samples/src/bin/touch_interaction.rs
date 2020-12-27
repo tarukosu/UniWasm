@@ -37,11 +37,7 @@ unsafe fn update() {
         }
     };
 
-    let scale = transform::Vector3 {
-        x: x,
-        y: x,
-        z: x,
-    };
+    let scale = transform::Vector3::new(x, x, x);
     transform::set_local_scale(0, scale);
 }
 

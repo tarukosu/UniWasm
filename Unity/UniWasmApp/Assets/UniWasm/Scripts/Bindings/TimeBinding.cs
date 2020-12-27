@@ -7,6 +7,10 @@ namespace UniWasm
 {
     public class TimeBinding : BindingBase
     {
+        public TimeBinding(Element element, ContentsStore store) : base(element, store)
+        {
+        }
+
         public override PredefinedImporter GenerateImporter()
         {
             var importer = new PredefinedImporter();

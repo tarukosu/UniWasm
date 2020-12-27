@@ -7,16 +7,12 @@ namespace UniWasm
 {
     public class PhysicsBinding : BindingBase
     {
-        private Transform transform;
-        private ContentsStore store;
-
         private Dictionary<string, Rigidbody> rigidbodyDictionary = new Dictionary<string, Rigidbody>();
 
-        public PhysicsBinding(Transform transform, ContentsStore store) : base()
+        public PhysicsBinding(Element element, ContentsStore store) : base(element, store)
         {
-            this.transform = transform;
-            this.store = store;
         }
+
 
         public override PredefinedImporter GenerateImporter()
         {
@@ -67,6 +63,10 @@ namespace UniWasm
 */
         private IReadOnlyList<object> SetWorldVelocity(IReadOnlyList<object> arg)
         {
+
+            return UniWasmUtils.Unit;
+
+            /*
             if (arg.Count != 4)
             {
                 return UniWasmUtils.Unit;
@@ -88,9 +88,11 @@ namespace UniWasm
 
             rigidbody.velocity = velocity;
             return UniWasmUtils.Unit;
+            */
         }
 
 
+        /*
         private bool TryGetRigidbody(string key, out Rigidbody rigidbody)
         {
             if (!rigidbodyDictionary.TryGetValue(key, out rigidbody))
@@ -112,5 +114,6 @@ namespace UniWasm
 
             return true;
         }
+        */
     }
 }

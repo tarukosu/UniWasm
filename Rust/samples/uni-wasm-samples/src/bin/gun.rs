@@ -1,6 +1,8 @@
-use uni_wasm::transform;
+use element::Element;
+use transform::Transform;
 use uni_wasm::element;
 use uni_wasm::physics;
+use uni_wasm::{Vector3, transform};
 
 fn main() {
     let bullet_index = element::get_resource_index_by_id("123");
@@ -17,38 +19,28 @@ unsafe fn update() {
 
 #[no_mangle]
 unsafe fn on_use() {
-    /*
-    let bullet_index = element::get_resource_index_by_id("bullet");
-    let element_id = element::spawn_object(bullet_index);
-    */
+    let transform = Transform::myself();
+    let gun_position = transform.get_world_position();
+    let gun_rotation = transform.get_world_rotation();
+
+    // spawn bullet
     let result = element::spawn_object_by_id("bullet");
     if result.is_err() {
         return;
     }
-    let element_id = result.unwrap();
+    let bullet_element = result.unwrap();
 
-    let gun_position = transform::get_world_position(0);
-    let forward = transform::get_world_forward(element_id);
-
+    // set position and rotation
     let offset = 0.5;
-    let position = transform::Vector3 {
-        x: gun_position.x + offset * forward.x,
-        y: gun_position.y + offset * forward.y,
-        z: gun_position.z + offset * forward.z,
-    };
+    let forward = transform.forward();
+    let bullet_position = gun_position + offset * forward;
 
-    transform::set_world_position(element_id, position);
+    let bullet_transform = bullet_element.transform();
+    bullet_transform.set_world_position(bullet_position);
+    bullet_transform.set_world_rotation(gun_rotation);
 
-    let rotation = transform::get_world_rotation(0);
-    transform::set_world_rotation(element_id, rotation);
-
+    // set velocity
     let speed = 4.0;
-
-    let velocity = transform::Vector3 {
-        x: forward.x * speed,
-        y: forward.y * speed,
-        z: forward.z * speed,
-    };
-
-    physics::set_world_velocity(element_id, velocity);
+    let velocity = speed * forward;
+    bullet_element.physics().set_world_velocity(velocity);
 }

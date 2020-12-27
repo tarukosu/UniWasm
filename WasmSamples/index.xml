@@ -3,6 +3,12 @@
         <primitive type="cube">
             <script src="./translate_x.wasm"/>
         </primitive>
+        <primitive type="cube" id="fix_local_position">
+            <script src="./wasm/fix_local_position.wasm"/>
+        </primitive>
+        <primitive type="cube" id="fix_world_position">
+            <script src="./wasm/fix_world_position.wasm"/>
+        </primitive>
         <element position.x="3">
             <primitive type="cube">
                 <script src="./circular_motion.wasm"/>

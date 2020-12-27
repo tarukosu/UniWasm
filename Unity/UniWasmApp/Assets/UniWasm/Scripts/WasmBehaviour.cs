@@ -71,6 +71,9 @@ namespace UniWasm
             {
                 GameObject = gameObject
             };
+            var debugBinding = new DebugBinding(element, store);
+            importer.IncludeDefinitions(debugBinding.Importer);
+
             var gameObjectBinding = new GameObjectBinding(element, store);
             importer.IncludeDefinitions(gameObjectBinding.Importer);
 
@@ -86,6 +89,7 @@ namespace UniWasm
             module = ModuleInstance.Instantiate(file, importer);
 
             gameObjectBinding.ModuleInstance = module;
+            debugBinding.ModuleInstance = module;
 
             var exportedFunctions = module.ExportedFunctions;
             exportedFunctions.TryGetValue("update", out updateFunction);

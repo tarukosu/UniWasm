@@ -1,10 +1,9 @@
 use once_cell::sync::Lazy;
+use clap::Clap;
 
 use uni_wasm::debug;
 use uni_wasm::transform::Transform;
 use uni_wasm::Vector3;
-
-use clap::Clap;
 
 #[derive(Clap)]
 struct Opts {
@@ -18,51 +17,47 @@ struct Opts {
     local: bool,
 }
 
-
-
-// static OPTS: Lazy<Mutex<Opts>> = Lazy::new(|| Mutex::new(parse_args()));
-static OPTS: Lazy<Opts> = Lazy::new(|| parse_args());
-
-fn parse_args() -> Opts {
-    Opts::parse()
+enum Coordinate {
+    Local,
+    World,
 }
 
-#[no_mangle]
-fn start() {
-    /*
-    for p in opts.position {
-        let message = format!("position {}", p);
-        debug::log_info(&message);
+struct Config {
+    coordinate: Coordinate,
+    position: Option<Vector3>,
+}
+
+static CONFIG: Lazy<Config> = Lazy::new(|| parse_args());
+
+fn parse_args() -> Config {
+    let opts = Opts::parse();
+
+    let position = if let [x, y, z] = opts.position[..] {
+        Some(Vector3::new(x, y, z))
+    } else {
+        None
+    };
+
+    let coordinate = if opts.world {
+        Coordinate::Local
+    } else {
+        Coordinate::World
+    };
+
+    Config {
+        coordinate: coordinate,
+        position: position,
     }
-    */
-    // let opts = OPTS;
-    for p in &OPTS.position {
-        let message = format!("position {}", p);
-        debug::log_info(&message);
-    }
-    /*
-    let opts = OPTS.lock().unwrap();
-    for p in &opts.position {
-        let message = format!("position {}", p);
-        debug::log_info(&message);
-    }
-    */
 }
 
 #[no_mangle]
 fn update() {
-    let position = Vector3::new(0.1, 0.2, 0.3);
     let transform = Transform::myself();
 
-    for p in &OPTS.position {
-        let message = format!("position {}", p);
-        debug::log_info(&message);
+    if let Some(position) = &CONFIG.position {
+        match &CONFIG.coordinate {
+            Coordinate::Local => transform.set_local_position(*position),
+            Coordinate::World => transform.set_world_position(*position),
+        }
     }
-    /*
-    if matches.opt_present("w") {
-        transform.set_world_position(position);
-    } else {
-        transform.set_local_position(position);
-    }
-    */
 }

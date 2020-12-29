@@ -10,13 +10,19 @@ namespace UniWasm
     public class WasmBehaviour : MonoBehaviour
     {
         private ModuleInstance module;
+        private FunctionDefinition startFunction;
         private FunctionDefinition updateFunction;
         private FunctionDefinition onTouchStartFunction;
         private FunctionDefinition onUseFunction;
 
+        protected virtual void Start()
+        {
+            startFunction?.Invoke(ReturnValue.Unit);
+        }
+
         protected virtual void Update()
         {
-            updateFunction?.Invoke(new object[0]);
+            updateFunction?.Invoke(ReturnValue.Unit);
         }
 
         public void InvokeOnUse()
@@ -24,19 +30,19 @@ namespace UniWasm
             onUseFunction?.Invoke(new object[0]);
         }
 
-        public void LoadWasm(string path, ContentsStore store = null)
+        public void LoadWasm(string path, ContentsStore store = null, List<string> args = null)
         {
             var file = WasmFile.ReadBinary(path);
-            LoadWasm(file, store);
+            LoadWasm(file, store, args);
         }
 
-        public void LoadWasm(Stream stream, ContentsStore store = null)
+        public void LoadWasm(Stream stream, ContentsStore store = null, List<string> args = null)
         {
             var file = WasmFile.ReadBinary(stream);
-            LoadWasm(file, store);
+            LoadWasm(file, store, args);
         }
 
-        protected void LoadWasm(WasmFile file, ContentsStore store = null)
+        protected void LoadWasm(WasmFile file, ContentsStore store = null, List<string> args = null)
         {
             if (store == null)
             {
@@ -48,11 +54,13 @@ namespace UniWasm
             var wasiFunctions = new List<string>()
             {
                 "proc_exit",
+                "fd_read",
                 "fd_write",
                 "fd_prestat_get",
                 "fd_prestat_dir_name",
                 "environ_sizes_get",
                 "environ_get",
+                // "random_get",
                 //"env.abort",
                 "abort",
             };
@@ -66,11 +74,28 @@ namespace UniWasm
                          x => x
                          ));
             }
+            importer.DefineFunction("random_get",
+                 new DelegateFunctionDefinition(
+                     ValueType.PointerAndPointer,
+                     ValueType.Int,
+                     x => ReturnValue.FromObject(0)
+                     ));
 
             var element = new Element()
             {
                 GameObject = gameObject
             };
+
+            if (args == null)
+            {
+                args = new List<string>();
+            }
+            var scriptName = "";
+            args.Insert(0, scriptName);
+
+            var argsBinding = new ArgsBinding(element, store, args);
+            importer.IncludeDefinitions(argsBinding.Importer);
+
             var debugBinding = new DebugBinding(element, store);
             importer.IncludeDefinitions(debugBinding.Importer);
 
@@ -88,10 +113,12 @@ namespace UniWasm
 
             module = ModuleInstance.Instantiate(file, importer);
 
+            argsBinding.ModuleInstance = module;
             gameObjectBinding.ModuleInstance = module;
             debugBinding.ModuleInstance = module;
 
             var exportedFunctions = module.ExportedFunctions;
+            exportedFunctions.TryGetValue("start", out startFunction);
             exportedFunctions.TryGetValue("update", out updateFunction);
             exportedFunctions.TryGetValue("on_touch_start", out onTouchStartFunction);
             exportedFunctions.TryGetValue("on_use", out onUseFunction);

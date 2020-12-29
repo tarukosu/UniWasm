@@ -1,13 +1,14 @@
 <soml>
     <scene>
-        <primitive type="cube">
-            <script src="./translate_x.wasm"/>
+        <primitive type="cube" id="fix_world_position">
+            <script src="./wasm/fix_transform.wasm" args="--position 1.0 2.0 3.0 --world"/>
         </primitive>
         <primitive type="cube" id="fix_local_position">
-            <script src="./wasm/fix_local_position.wasm"/>
+            <script src="./wasm/fix_transform.wasm" args="--position 1.0 2.0 3.0 --local"/>
         </primitive>
-        <primitive type="cube" id="fix_world_position">
-            <script src="./wasm/fix_world_position.wasm"/>
+
+        <primitive type="cube">
+            <script src="./translate_x.wasm"/>
         </primitive>
         <element position.x="3">
             <primitive type="cube">

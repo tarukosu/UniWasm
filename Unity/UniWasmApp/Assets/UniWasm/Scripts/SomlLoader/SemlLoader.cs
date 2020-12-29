@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using UnityEngine;
 
@@ -175,24 +176,29 @@ namespace UniWasm
 
         protected virtual WasmBehaviour AttatchScript(string path, XmlNode node, Transform parent)
         {
-            var src = node.Attributes["src"];
-            if (src == null)
+            if (!node.TryGetAttribute("src", out var src))
             {
                 return null;
             }
 
-            Debug.Log(src.Value);
-            var srcPath = GetAbsolutePath(path, src.Value);
+            var srcPath = GetAbsolutePath(path, src);
             Debug.Log(srcPath);
+
+            var args = ReadAttribute(node, "args", "");
+            Debug.Log(args);
+
+            var separator = new char[] { ' ' };
+            var argsList = args.Split(separator, StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
 
             var wasm = parent.gameObject.AddComponent<WasmFromUrl>();
             if (srcPath.StartsWith("http"))
             {
-                _ = wasm.LoadWasmFromUrl(srcPath, contentsStore);
+                _ = wasm.LoadWasmFromUrl(srcPath, contentsStore, argsList);
             }
             else
             {
-                wasm.LoadWasm(srcPath, contentsStore);
+                wasm.LoadWasm(srcPath, contentsStore, argsList);
             }
             return wasm;
         }
@@ -214,7 +220,6 @@ namespace UniWasm
             Debug.Log(srcPath);
             var go = new GameObject();
             var gltf = go.AddComponent<GltfEntity>();
-            // var gltf = go.AddComponent<GLTFast.GltfAsset>();
             gltf.Load(srcPath);
             return go.transform;
         }

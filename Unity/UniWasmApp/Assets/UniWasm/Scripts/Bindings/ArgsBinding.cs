@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Wasm.Interpret;
 
 namespace UniWasm
 {
     public class ArgsBinding : BindingBase
     {
-        public ArgsBinding(Element element, ContentsStore store) : base(element, store)
+        private readonly List<string> args;
+
+        public ArgsBinding(Element element, ContentsStore store, List<string> args) : base(element, store)
         {
+            this.args = args;
         }
 
         public override PredefinedImporter GenerateImporter()
@@ -57,18 +59,12 @@ namespace UniWasm
                 return ErrorResult;
             }
 
-            for (var i = 0; i < 2; i++)
+            foreach (var argString in args)
             {
-                // value = InterpretAsUint(intValue);
                 memory32[argvOffset] = ArgumentParser.InterpretAsInt(argvBufferOffset);
-                //argvOffset += 1;
                 argvOffset += 4;
 
-
-                memory8[argvBufferOffset] = 65;
-                memory8[argvBufferOffset + 1] = 66;
-                memory8[argvBufferOffset + 2] = 0;
-                argvBufferOffset += 3;
+                argvBufferOffset = WriteStringToMemory(memory8, argString, argvBufferOffset);
             }
 
             return SuccessResult;
@@ -90,11 +86,36 @@ namespace UniWasm
                 return ErrorResult;
             }
 
-            var argc = 2;
+            var argc = args.Count;
+            var dataSize = 0;
+            foreach (var argString in args)
+            {
+                var bytes = System.Text.Encoding.UTF8.GetBytes(argString);
+                dataSize += bytes.Length + 1;
+            }
+
             memory32[argvOffset] = argc;
-            memory32[argvBufferOffset] = 6;
+            memory32[argvBufferOffset] = dataSize;
 
             return SuccessResult;
+        }
+
+        private uint WriteStringToMemory(LinearMemoryAsInt8 memory, string text, uint offset)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+            offset = WriteBytesToMemory(memory, bytes, offset);
+            var nullBytes = new byte[] { 0 };
+            offset = WriteBytesToMemory(memory, nullBytes, offset);
+            return offset;
+        }
+        private uint WriteBytesToMemory(LinearMemoryAsInt8 memory, byte[] data, uint offset)
+        {
+            foreach (var byteData in data)
+            {
+                memory[offset] = (sbyte)byteData;
+                offset += 1;
+            }
+            return offset;
         }
     }
 }
